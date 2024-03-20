@@ -1,0 +1,28 @@
+<table class="table">
+    <thead>
+        <tr>
+            <th>Description</th>
+            <th>Node</th>
+            <th>Started</th>
+            <th>Finished</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody
+    {% if scans|length > 0 %}
+    {% for scan in scans %}
+        <tr>
+            <td>{{ scan.description }}</td>
+            <td><code>{{ scan.node.description }}</code></td>
+            <td><code>{{ scan.created_as_string }}</code></td>
+            <td><code>{{ scan.status }}</code></td>
+            <td></td>
+        </tr>
+    {% endfor %}
+    {% else %}
+        <tr>
+            <th class="text-center" colspan="4">No scans found. Click "+" to add one</th>
+        </tr>
+    {% endif %}
+    </tbody>
+</table>

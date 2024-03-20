@@ -1,0 +1,6 @@
+Flask
+Flask-Bcrypt
+Flask-SQLAlchemy
+python-dotenv
+flask-smorest
+requests

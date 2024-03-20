@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="htmx-config" content='{"includeIndicatorStyles": false}' />
+        <title>Burp Pro Scan Manager</title>
+        <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.3/dist/full.min.css" rel="stylesheet" type="text/css" />
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://unpkg.com/htmx.org@latest/dist/htmx.min.js"></script>
+        <script src="https://unpkg.com/htmx.org@1.9.11/dist/ext/debug.js"></script>
+    </head>
+    <body>
+        {{ render_partial('partials/flash.html') }}
+        <header class="shadow-lg relative z-40"><!-- relative prevents content from overlapping header shadow -->
+            <nav class="navbar bg-base-100">
+                <div class="flex-1">
+                    <a href="{{ url_for('core.home') }}" class="btn btn-ghost text-xl">Burp Pro Scan Manager</a>
+                </div>
+                <div class="flex-none">
+                    <div class="dropdown dropdown-end md:hidden">
+                        <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-5 h-5 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                        </div>
+                        <ul class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100">
+                            <li><a href="{{ url_for('core.assets') }}">Assets</a></li>
+                            <li><a href="{{ url_for('core.nodes') }}">Nodes</a></li>
+                            <li><a href="{{ url_for('core.scans') }}">Scans</a></li>
+                        </ul>
+                    </div>
+                    <div class="hidden md:inline-block">
+                        <ul class="menu menu-horizontal px-1">
+                            <li><a href="{{ url_for('core.assets') }}">Assets</a></li>
+                            <li><a href="{{ url_for('core.nodes') }}">Nodes</a></li>
+                            <li><a href="{{ url_for('core.scans') }}">Scans</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </header>
+        <section class="max-w-4xl mx-auto p-4 bg-base-100 flex flex-col">
+            {% block body %}{% endblock %}
+        </section>
+        <footer></footer>
+        <!--script src="{{ url_for('static', filename='js/enterprize.js') }}"></script-->
+        <style>
+            .flash-message-hide {
+                animation: toast-hide 0.25s ease-out
+            }
+            @keyframes toast-hide {
+                0% {
+                    transform: scale(1);
+                    opacity: 1
+                }
+                100% {
+                    transform: scale(0.9);
+                    opacity: 0
+                }
+            }
+        </style>
+        <script>
+            htmx.onLoad(() => {
+                htmx.findAll('.flash-message').forEach((element) => {
+                    if (!element.dying) {
+                        setTimeout(() => {
+                            element.addEventListener("animationend", () => {
+                                element.remove();
+                            })
+                            element.classList.add('flash-message-hide');
+                        }, 5000);
+                        element.dying = true;
+                    };
+                });
+            });
+        </script>
+    </body>
+</html>

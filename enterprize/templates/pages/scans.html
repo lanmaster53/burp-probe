@@ -1,0 +1,53 @@
+{% extends "shared/layout.html" %}
+{% block body %}
+<div class="flex items-center">
+    <div class="flex-1"><h1 class="text-2xl font-semibold px-2 py-4">Scans</h1></div>
+    <div class="flex-none">
+        <button class="btn btn-circle btn-ghost" onclick="addScanModal.showModal()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>              
+        </button>
+    </div>
+</div>
+<div
+    class="overflow-x-auto"
+    id="scans"
+    hx-get="{{ url_for('core.scans_partial') }}"
+    hx-trigger="watch-refresh-scans from:body"
+    hx-swap="innerHTML"
+>
+    {{ render_partial('partials/scans.html', scans=scans) }}
+</div>
+
+<dialog id="addScanModal" class="modal">
+    <div class="modal-box">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+        <form
+            class="flex flex-col p-2"
+            hx-post="{{ url_for('core.scans_create') }}"
+            hx-trigger="click from:#save"
+            hx-swap="none"
+            hx-on::after-request="this.reset();addScanModal.close()"
+        >
+            <div class="label"><span class="label-text">Credentials</span></div>
+            <input name="credentials" type="text" placeholder="Enter a comma delimited list of credntials, i.e. root:123456." class="input input-bordered" />
+            <div class="label"><span class="label-text">Configurations</span></div>
+            <input name="configurations" type="text" placeholder="Enter a comma delimited list of configuration names." class="input input-bordered" value="Crawl Only" />
+            <div class="label"><span class="label-text">Scope Inclusions</span></div>
+            <input name="scope_includes" type="text" placeholder="Enter a comma delimited list of URLs." class="input input-bordered" />
+            <div class="label"><span class="label-text">Scope Exclusions</span></div>
+            <input name="scope_excludes" type="text" placeholder="Enter a comma delimited list of URLs." class="input input-bordered" />
+            <div class="label"><span class="label-text">Asset IDs</span></div>
+            <input name="assets" type="text" placeholder="Enter a comma delimited list of asset IDs." class="input input-bordered" value="0ab8f1f4-7201-4944-96da-234ef19e2254"/>
+            <div class="label"><span class="label-text">Node ID</span></div>
+            <input name="node" type="text" placeholder="Enter a node ID." class="input input-bordered" value="db68ac8b-8268-4784-8569-bab7ce89c35a"/>
+            <div class="flex justify-end mt-9">
+                <button id="save" class="btn">Save</button>
+            </div>
+        </form>
+    </div>
+</dialog>
+{% endblock %}

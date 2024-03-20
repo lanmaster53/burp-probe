@@ -1,0 +1,11 @@
+<div
+    class="toast toast-top z-50"
+    hx-swap-oob="afterbegin"
+    id="flash"
+>
+{% for category, message in get_flashed_messages(with_categories=True) %}
+    <div class="flash-message alert alert-{{ category }}">
+        <span>{{ message }}</span>
+    </div>
+{% endfor %}
+</div>
