@@ -73,7 +73,7 @@ class Scan(BaseModel):
     name: Mapped[str] = mapped_column(db.String(), nullable=False, unique=True)
     description: Mapped[str] = mapped_column(db.String(), nullable=False)
     # from Form input
-    configuration: Mapped[str] = mapped_column(db.String(), nullable=False) # JSON config stored as string
+    configuration: Mapped[str] = mapped_column(db.String(), nullable=True) # JSON config stored as string
     # from JSON response
     '''audit_requests_made: Mapped[int] = mapped_column(db.Integer(), nullable=False)
     crawl_and_audit_caption: Mapped[str] = mapped_column(db.String(), nullable=False)
@@ -83,8 +83,8 @@ class Scan(BaseModel):
     total_elapsed_time: Mapped[int] = mapped_column(db.Integer(), nullable=False)
     scan_status: Mapped[str] = mapped_column(db.String(), nullable=False)'''
     status: Mapped[str] = mapped_column(db.String(), nullable=False)
-    result: Mapped[str] = mapped_column(db.String(), nullable=False)
-    task_id: Mapped[str] = mapped_column(db.String(), nullable=False)
+    result: Mapped[str] = mapped_column(db.String(), nullable=True)
+    task_id: Mapped[int] = mapped_column(db.Integer(), nullable=True)
     node_id: Mapped[str] = mapped_column(db.String(36), db.ForeignKey('nodes.id'), nullable=False)
     node: Mapped['Node'] = relationship('Node', back_populates='scans', foreign_keys=[node_id])
     assets = relationship('Asset', secondary=assets_scans, back_populates='scans')
@@ -94,7 +94,7 @@ class Scan(BaseModel):
         return Node.query.filter_by(node_id=node_id, task_id=task_id).first()
 
     def __repr__(self):
-        return f"<Scan '{self.description}'>"
+        return f"<Scan '{self.name}'>"
 
 
 class Node(BaseModel):
@@ -134,6 +134,10 @@ class Node(BaseModel):
         )
         return burp.is_alive()
 
+    @property
+    def active_scans(self):
+        return [s for s in self.scans if s.status not in ['succeeded']]
+
     @staticmethod
     def get_live_nodes():
         live_nodes = []
@@ -143,4 +147,4 @@ class Node(BaseModel):
         return live_nodes
 
     def __repr__(self):
-        return f"<Node '{self.url}'>"
+        return f"<Node '{self.name}'>"

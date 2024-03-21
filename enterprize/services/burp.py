@@ -41,7 +41,7 @@ class BurpProApi:
 
     def post_scan_config(self, payload):
         response = self._call_api('/scan', 'POST', payload)
-        data = {'task_id': response.headers['location']}
+        data = {'task_id': int(response.headers.get('location', '-1'))}
         #print('POST Result:\n', json.dumps(data, indent=4))
         return data
 

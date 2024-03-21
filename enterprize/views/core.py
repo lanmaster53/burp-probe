@@ -1,4 +1,4 @@
-from flask import Blueprint, request, redirect, url_for, flash, render_template, abort
+from flask import Blueprint, current_app, request, redirect, url_for, flash, render_template, abort
 from enterprize import db
 from enterprize.decorators import hx_trigger
 from enterprize.helpers import render_partial
@@ -187,7 +187,7 @@ def scans_create():
     for asset_id in asset_ids:
         asset = Asset.query.filter_by(id=asset_id).first()
         assets.append(asset)
-    if len(assets) != len(asset_ids):
+    if not assets or len(assets) != len(asset_ids):
         flash('Invalid asset ID(s).', 'error')
         return ''
     asset_urls = [a.url for a in assets]
@@ -200,31 +200,45 @@ def scans_create():
         flash('Scanner node is not available.', 'error')
         return ''
     # build and run the scan
-    callback_url = url_for('api.callback', _external=True)
+    scan = Scan(
+        name=name,
+        description=description,
+        status='created',
+        assets=assets,
+        node=node,
+    )
+    db.session.add(scan)
+    db.session.flush()
+    print(scan.id)
+    callback_url = url_for('core.scans_callback', scan_id=scan.id, _external=True)
     scan_config = burp_scan_builder(callback_url, credentials, configurations, scope_includes, scope_excludes, asset_urls)
-    print(json.dumps(scan_config, indent=4))
+    current_app.logger.debug(f"Scanner Config:\n{json.dumps(scan_config, indent=4)}")
+    #db.session.rollback()
     burp = BurpProApi(
         protocol=node.protocol,
         hostname=node.hostname,
         port=node.port,
         api_key=node.api_key,
     )
-    '''response = burp.post_scan_config(scan_config)
-    print(json.dumps(response, indent=4))
-    scan = Scan(
-        name=name,
-        description=description,
-        configuration=scan_config,
-        status='started',
-        result=None,
-        task_id=response.headers.get['location'],
-        assets=assets,
-        node=node,
-    )
-    db.session.add(scan)
+    response = burp.post_scan_config(scan_config)
+    scan.configuration = json.dumps(scan_config)
+    scan.status = 'started'
+    scan.task_id = response['task_id']
     db.session.commit()
-    flash('Scan created.', 'success')'''
+    flash('Scan created.', 'success')
     return ''
+
+@blp.route('/scans/<string:scan_id>/callback', methods=['PUT'])
+def scans_callback(scan_id):
+    # TODO: validate with schema
+    payload = request.get_json()
+    current_app.logger.debug(f"Callback Payload:\n{json.dumps(payload, indent=4)}")
+    # update the scan
+    scan = Scan.query.get(scan_id)
+    scan.result = json.dumps(payload)
+    scan.status = payload.get('scan_status')
+    db.session.commit()
+    return '', 204
 
 @blp.route('/scans/<string:scan_id>', methods=['DELETE'])
 #@login_required

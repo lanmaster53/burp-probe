@@ -6,7 +6,7 @@ def burp_scan_builder(callback_url, credentials, configurations, scope_includes,
     }
     if credentials:
         scan_config['application_logins'] = []
-        for credential in credentials.split():
+        for credential in credentials.split('\n'):
             username, password = [w.strip() for w in credential.split(':')]
             c = {
                 'password': password,
@@ -16,7 +16,7 @@ def burp_scan_builder(callback_url, credentials, configurations, scope_includes,
             scan_config['application_logins'].append(c)
     if configurations:
         scan_config['scan_configurations'] = []
-        for configuration in configurations.split():
+        for configuration in configurations.split('\n'):
             c = {
                 'name': configuration,
                 'type': 'NamedConfiguration'
@@ -28,14 +28,14 @@ def burp_scan_builder(callback_url, credentials, configurations, scope_includes,
         }
         if scope_includes:
             scan_config['scope']['include'] = []
-            for scope_include in scope_includes.split():
+            for scope_include in scope_includes.split('\n'):
                 c = {
                     'rule': scope_include
                 }
                 scan_config['scope']['include'].append(c)
         if scope_excludes:
             scan_config['scope']['exclude'] = []
-            for scope_exclude in scope_excludes.split():
+            for scope_exclude in scope_excludes.split('\n'):
                 c = {
                     'rule': scope_exclude
                 }

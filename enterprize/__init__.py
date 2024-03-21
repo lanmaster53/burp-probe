@@ -48,13 +48,6 @@ def create_app(config):
     def init_data():
         from enterprize import models
         db.create_all()
-        from enterprize.models import Asset
-        asset = Asset(
-            url = 'http://www.pwnedhub.com',
-            description = 'Pwnedhub legacy application.'
-        )
-        db.session.add(asset)
-        db.session.commit()
         # initialization logic here (optional)
         app.logger.info('Database initialized.')
 
