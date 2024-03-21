@@ -3,7 +3,11 @@
 <div class="flex items-center">
     <div class="flex-1"><h1 class="text-2xl font-semibold px-2 py-4">Assets</h1></div>
     <div class="flex-none">
-        <button class="btn btn-circle btn-ghost" onclick="addAssetModal.showModal()">
+        <button
+            class="btn btn-circle btn-ghost"
+            hx-get="{{ url_for('core.assets_modal') }}"
+            hx-target="#addAssetModal"
+        >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>              
@@ -13,33 +17,13 @@
 <div
     class="overflow-x-auto"
     id="assets"
-    hx-get="{{ url_for('core.assets_partial') }}"
-    hx-trigger="watch-refresh-assets from:body"
+    hx-get="{{ url_for('core.assets_table') }}"
+    hx-trigger="load, watch-refresh-assets from:body"
     hx-swap="innerHTML"
->
-    {{ render_partial('partials/assets.html', assets=assets) }}
-</div>
-
-<dialog id="addAssetModal" class="modal">
-    <div class="modal-box">
-        <form method="dialog">
-            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-        </form>
-        <form
-            class="flex flex-col p-2"
-            hx-post="{{ url_for('core.assets_create') }}"
-            hx-trigger="click from:#save"
-            hx-swap="none"
-            hx-on::after-request="this.reset();addAssetModal.close()"
-        >
-            <div class="label"><span class="label-text">Description</span></div>
-            <input name="description" type="text" placeholder="Enter a description." class="input input-bordered" />
-            <div class="label"><span class="label-text">URL</span></div>
-            <input name="url" type="text" placeholder="Enter a URL." class="input input-bordered" />
-            <div class="flex justify-end mt-9">
-                <button id="save" class="btn">Save</button>
-            </div>
-        </form>
-    </div>
-</dialog>
+></div>
+<dialog
+    id="addAssetModal"
+    class="modal"
+    hx-on:htmx:after-swap="this.showModal();"
+></dialog>
 {% endblock %}

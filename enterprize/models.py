@@ -1,5 +1,6 @@
 from enterprize import db, bcrypt
 from enterprize.services.burp import BurpProApi
+from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime, timezone
 import binascii
@@ -59,7 +60,7 @@ assets_scans = db.Table(
 
 class Asset(BaseModel):
     __tablename__ = 'assets'
-    url: Mapped[str] = mapped_column(db.String(), nullable=False)
+    url: Mapped[str] = mapped_column(db.String(), nullable=False, unique=True)
     description: Mapped[str] = mapped_column(db.String(), nullable=False)
     scans = relationship('Scan', secondary=assets_scans, back_populates='assets')
 
@@ -69,17 +70,20 @@ class Asset(BaseModel):
 
 class Scan(BaseModel):
     __tablename__ = 'scans'
+    name: Mapped[str] = mapped_column(db.String(), nullable=False, unique=True)
     description: Mapped[str] = mapped_column(db.String(), nullable=False)
     # from Form input
     configuration: Mapped[str] = mapped_column(db.String(), nullable=False) # JSON config stored as string
     # from JSON response
-    audit_requests_made: Mapped[int] = mapped_column(db.Integer(), nullable=False)
+    '''audit_requests_made: Mapped[int] = mapped_column(db.Integer(), nullable=False)
     crawl_and_audit_caption: Mapped[str] = mapped_column(db.String(), nullable=False)
     crawl_and_audit_progress: Mapped[int] = mapped_column(db.Integer(), nullable=False)
     crawl_requests_made: Mapped[int] = mapped_column(db.Integer(), nullable=False)
     issue_events: Mapped[int] = mapped_column(db.Integer(), nullable=False)
     total_elapsed_time: Mapped[int] = mapped_column(db.Integer(), nullable=False)
-    scan_status: Mapped[str] = mapped_column(db.String(), nullable=False)
+    scan_status: Mapped[str] = mapped_column(db.String(), nullable=False)'''
+    status: Mapped[str] = mapped_column(db.String(), nullable=False)
+    result: Mapped[str] = mapped_column(db.String(), nullable=False)
     task_id: Mapped[str] = mapped_column(db.String(), nullable=False)
     node_id: Mapped[str] = mapped_column(db.String(36), db.ForeignKey('nodes.id'), nullable=False)
     node: Mapped['Node'] = relationship('Node', back_populates='scans', foreign_keys=[node_id])
@@ -95,6 +99,8 @@ class Scan(BaseModel):
 
 class Node(BaseModel):
     __tablename__ = 'nodes'
+    #__table_args__ = tuple(UniqueConstraint('protocol', 'hostnams', 'port'))
+    name: Mapped[str] = mapped_column(db.String(), nullable=False, unique=True)
     description: Mapped[str] = mapped_column(db.String(), nullable=False)
     protocol: Mapped[str] = mapped_column(db.String(), nullable=False)
     hostname: Mapped[str] = mapped_column(db.String(), nullable=False)
@@ -127,6 +133,14 @@ class Node(BaseModel):
             api_key=self.api_key,
         )
         return burp.is_alive()
+
+    @staticmethod
+    def get_live_nodes():
+        live_nodes = []
+        for node in Node.query.all():
+            if node.is_alive:
+                live_nodes.append(node)
+        return live_nodes
 
     def __repr__(self):
         return f"<Node '{self.url}'>"

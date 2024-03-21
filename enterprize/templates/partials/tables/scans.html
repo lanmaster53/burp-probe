@@ -1,7 +1,7 @@
 <table class="table">
     <thead>
         <tr>
-            <th>Description</th>
+            <th>Name</th>
             <th>Node</th>
             <th>Started</th>
             <th>Finished</th>
@@ -12,11 +12,13 @@
     {% if scans|length > 0 %}
     {% for scan in scans %}
         <tr>
-            <td>{{ scan.description }}</td>
-            <td><code>{{ scan.node.description }}</code></td>
+            <td>{{ scan.name }}</td>
+            <td><code>{{ scan.node.name }}</code></td>
             <td><code>{{ scan.created_as_string }}</code></td>
             <td><code>{{ scan.status }}</code></td>
-            <td></td>
+            <td>
+                <div class="flex"></div>
+            </td>
         </tr>
     {% endfor %}
     {% else %}

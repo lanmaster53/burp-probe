@@ -3,7 +3,11 @@
 <div class="flex items-center">
     <div class="flex-1"><h1 class="text-2xl font-semibold px-2 py-4">Nodes</h1></div>
     <div class="flex-none">
-        <button class="btn btn-circle btn-ghost" onclick="addNodeModal.showModal()">
+        <button
+            class="btn btn-circle btn-ghost"
+            hx-get="{{ url_for('core.nodes_modal') }}"
+            hx-target="#addNodeModal"
+        >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>              
@@ -13,39 +17,13 @@
 <div
     class="overflow-x-auto"
     id="nodes"
-    hx-get="{{ url_for('core.nodes_partial') }}"
-    hx-trigger="watch-refresh-nodes from:body"
+    hx-get="{{ url_for('core.nodes_table') }}"
+    hx-trigger="load, watch-refresh-nodes from:body"
     hx-swap="innerHTML"
->
-    {{ render_partial('partials/nodes.html', nodes=nodes) }}
-</div>
-
-<dialog id="addNodeModal" class="modal">
-    <div class="modal-box">
-        <form method="dialog">
-            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-        </form>
-        <form
-            class="flex flex-col p-2"
-            hx-post="{{ url_for('core.nodes_create') }}"
-            hx-trigger="click from:#save"
-            hx-swap="none"
-            hx-on::after-request="this.reset();addNodeModal.close()"
-        >
-            <div class="label"><span class="label-text">Description</span></div>
-            <input name="description" type="text" placeholder="Enter a description." class="input input-bordered" />
-            <div class="label"><span class="label-text">Protocol</span></div>
-            <input name="protocol" type="text" placeholder="Enter a protocol, i.e. http or https." class="input input-bordered" />
-            <div class="label"><span class="label-text">Hostname/IP</span></div>
-            <input name="hostname" type="text" placeholder="Enter a hostname or IP address." class="input input-bordered" />
-            <div class="label"><span class="label-text">Port</span></div>
-            <input name="port" type="text" placeholder="Enter a port number." class="input input-bordered" />
-            <div class="label"><span class="label-text">API Key</span></div>
-            <input name="api_key" type="text" placeholder="Enter a Burp Pro API key." class="input input-bordered" />
-            <div class="flex justify-end mt-9">
-                <button id="save" class="btn">Save</button>
-            </div>
-        </form>
-    </div>
-</dialog>
+></div>
+<dialog
+    id="addNodeModal"
+    class="modal"
+    hx-on:htmx:after-swap="this.showModal();"
+></dialog>
 {% endblock %}

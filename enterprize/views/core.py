@@ -5,6 +5,8 @@ from enterprize.helpers import render_partial
 from enterprize.middleware import load_user, modify_response
 from enterprize.models import Asset, Node, Scan
 from enterprize.services.burp import BurpProApi
+from enterprize.utilities import burp_scan_builder
+import json
 
 blp = Blueprint('core', __name__)
 
@@ -31,12 +33,24 @@ def home():
 @blp.route('/assets')
 #@login_required
 def assets():
-    return render_template('pages/assets.html', assets=Asset.query.all())
+    return render_template(
+        'pages/assets.html',
+)
 
-@blp.route('/assets/partial')
+@blp.route('/assets/table')
 #@login_required
-def assets_partial():
-    return render_partial('partials/assets.html', assets=Asset.query.all())
+def assets_table():
+    return render_partial(
+        'partials/tables/assets.html',
+        assets=Asset.query.all()
+    )
+
+@blp.route('/assets/modal')
+#@login_required
+def assets_modal():
+    return render_partial(
+        'partials/modals/assets.html',
+    )
 
 @blp.route('/assets', methods=['POST'])
 #@login_required
@@ -70,18 +84,31 @@ def assets_delete(asset_id):
 @blp.route('/nodes')
 #@login_required
 def nodes():
-    return render_template('pages/nodes.html', nodes=Node.query.all())
+    return render_template(
+        'pages/nodes.html',
+    )
 
-@blp.route('/nodes/partial')
+@blp.route('/nodes/table')
 #@login_required
-def nodes_partial():
-    return render_partial('partials/nodes.html', nodes=Node.query.all())
+def nodes_table():
+    return render_partial(
+        'partials/tables/nodes.html',
+        nodes=Node.query.all()
+    )
+
+@blp.route('/nodes/modal')
+#@login_required
+def nodes_modal():
+    return render_partial(
+        'partials/modals/nodes.html',
+    )
 
 @blp.route('/nodes', methods=['POST'])
 #@login_required
 @hx_trigger('watch-refresh-nodes')
 def nodes_create():
     node = Node(
+        name=request.form.get('name'),
         description=request.form.get('description'),
         protocol=request.form.get('protocol'),
         hostname=request.form.get('hostname'),
@@ -112,101 +139,91 @@ def nodes_test(node_id):
     if node.is_alive:
         flash('Node is available.', 'success')
     else:
-        flash('Node is not available.', 'info')
+        flash('Node is not available.', 'warning')
     return ''
 
 # endregion
 
 # region scans
 
-
-
-
-
 @blp.route('/scans')
 #@login_required
 def scans():
-    return render_template('pages/scans.html', scans=Scan.query.all())
+    return render_template(
+        'pages/scans.html',
+    )
 
-@blp.route('/scans/partial')
+@blp.route('/scans/table')
 #@login_required
-def scans_partial():
-    return render_partial('partials/scans.html', scans=Scan.query.all())
+def scans_table():
+    return render_partial(
+        'partials/tables/scans.html',
+        scans=Scan.query.all(),
+    )
+
+@blp.route('/scans/modal')
+#@login_required
+def scans_modal():
+    return render_partial(
+        'partials/modals/scans.html',
+        assets=Asset.query.all(),
+        nodes=Node.get_live_nodes(),
+    )
 
 @blp.route('/scans', methods=['POST'])
 #@login_required
 @hx_trigger('watch-refresh-scans')
 def scans_create():
+    name = request.form.get('name')
+    description = request.form.get('description')
     credentials = request.form.get('credentials')
     configurations = request.form.get('configurations')
     scope_includes = request.form.get('scope_includes')
     scope_excludes = request.form.get('scope_excludes')
-    asset_ids = request.form.get('assets')
+    asset_ids = request.form.getlist('assets')
     node_id = request.form.get('node')
-    scan_config = {
-        'scan_callback': {
-            'url': url_for('api.callback', _external=True),
-        }
-    }
-    if credentials:
-        scan_config['application_logins'] = []
-        for credential in [c.strip() for c in credentials.split(',')]:
-            username, password = [w.strip() for w in credential.split(':')]
-            c = {
-                'password': password,
-                'type': 'UsernameAndPasswordLogin',
-                'username': username,
-            }
-            scan_config['application_logins'].append(c)
-    if configurations:
-        scan_config['scan_configurations'] = []
-        for configuration in [c.strip() for c in configurations.split(',')]:
-            c = {
-                'name': configuration,
-                'type': 'NamedConfiguration'
-            }
-            scan_config['scan_configurations'].append(c)
-    if scope_includes or scope_excludes:
-        scan_config['scope'] = {
-            'type': 'SimpleScope',
-        }
-        if scope_includes:
-            scan_config['scope']['include'] = []
-            for scope_include in [c.strip() for c in scope_includes.split(',')]:
-                c = {
-                    'rule': scope_include
-                }
-                scan_config['scope']['include'].append(c)
-        if scope_excludes:
-            scan_config['scope']['exclude'] = []
-            for scope_exclude in [c.strip() for c in scope_excludes.split(',')]:
-                c = {
-                    'rule': scope_exclude
-                }
-                scan_config['scope']['exclude'].append(c)
-    if asset_ids:
-        scan_config['urls'] = []
-        for asset_id in [c.strip() for c in asset_ids.split(',')]:
-            asset = Asset.query.filter_by(id=asset_id).first()
-            scan_config['urls'].append(asset.url)
-    # need to check that node is up
-    import json
-    print(json.dumps(scan_config, indent=4))
+    # resolve asset IDs
+    assets = []
+    for asset_id in asset_ids:
+        asset = Asset.query.filter_by(id=asset_id).first()
+        assets.append(asset)
+    if len(assets) != len(asset_ids):
+        flash('Invalid asset ID(s).', 'error')
+        return ''
+    asset_urls = [a.url for a in assets]
+    # resolve node ID
     node = Node.query.filter_by(id=node_id).first()
+    if not node:
+        flash('Invalid node ID.', 'error')
+        return ''
+    if not node.is_alive:
+        flash('Scanner node is not available.', 'error')
+        return ''
+    # build and run the scan
+    callback_url = url_for('api.callback', _external=True)
+    scan_config = burp_scan_builder(callback_url, credentials, configurations, scope_includes, scope_excludes, asset_urls)
+    print(json.dumps(scan_config, indent=4))
     burp = BurpProApi(
         protocol=node.protocol,
         hostname=node.hostname,
         port=node.port,
         api_key=node.api_key,
     )
-    response = burp.post_scan_config(scan_config)
+    '''response = burp.post_scan_config(scan_config)
     print(json.dumps(response, indent=4))
-    '''scan = Scan(
-        description=request.form.get('description'),
+    scan = Scan(
+        name=name,
+        description=description,
+        configuration=scan_config,
+        status='started',
+        result=None,
+        task_id=response.headers.get['location'],
+        assets=assets,
+        node=node,
     )
     db.session.add(scan)
-    db.session.commit()'''
-    flash('Scan created.', 'success')
+    db.session.commit()
+    flash('Scan created.', 'success')'''
     return ''
 
 @blp.route('/scans/<string:scan_id>', methods=['DELETE'])
@@ -220,10 +237,5 @@ def scans_delete(scan_id):
     db.session.commit()
     flash('Scan deleted.', 'success')
     return ''
-
-
-
-
-
 
 # endregion

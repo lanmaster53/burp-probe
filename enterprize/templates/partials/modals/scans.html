@@ -1,0 +1,42 @@
+<div class="modal-box">
+    <form method="dialog">
+        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+    </form>
+    <form
+        class="flex flex-col p-2"
+        hx-post="{{ url_for('core.scans_create') }}"
+        hx-trigger="click from:#save"
+        hx-swap="none"
+        hx-on::after-request="this.reset();addScanModal.close()"
+    >
+        <div class="label"><span class="label-text">Name</span></div>
+        <input name="name" type="text" placeholder="Enter a unique name." class="input input-bordered" />
+        <div class="label"><span class="label-text">Description</span></div>
+        <input name="description" type="text" placeholder="Enter a description." class="input input-bordered" />
+        <div class="label"><span class="label-text">Credentials</span></div>
+        <textarea name="credentials" class="textarea textarea-bordered" placeholder="Enter a list of credntials. i.e. root:123456"></textarea>
+        <div class="label"><span class="label-text">Configurations</span></div>
+        <textarea name="configurations" class="textarea textarea-bordered" placeholder="Enter a list of configuration names.">Crawl Only</textarea>
+        <div class="label"><span class="label-text">Scope Inclusions</span></div>
+        <textarea name="scope_includes" class="textarea textarea-bordered" placeholder="Enter a list of URLs."></textarea>
+        <div class="label"><span class="label-text">Scope Exclusions</span></div>
+        <textarea name="scope_excludes" class="textarea textarea-bordered" placeholder="Enter a list of URLs."></textarea>
+        <div class="label"><span class="label-text">Assets</span></div>
+        <select name="assets" class="select select-bordered" multiple>
+            <!--option disabled selected>Select one or more assets to scan.</option-->
+        {% for asset in assets %}
+            <option value="{{ asset.id }}">{{ asset.url }}</option>
+        {% endfor %}
+        </select>
+        <div class="label"><span class="label-text">Node</span></div>
+        <select name="node" class="select select-bordered">
+            <!--option disabled selected>Select an available scanning node.</option-->
+        {% for node in nodes %}
+            <option value="{{ node.id }}">{{ node.name }}</option>
+        {% endfor %}
+        </select>
+        <div class="flex justify-end mt-9">
+            <button id="save" class="btn">Save</button>
+        </div>
+    </form>
+</div>
