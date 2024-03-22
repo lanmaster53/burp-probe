@@ -1,3 +1,4 @@
+import json
 import requests
 
 
@@ -40,19 +41,19 @@ class BurpProApi:
     def post_scan_config(self, payload):
         response = self._call_api('/scan', 'POST', payload)
         data = {'task_id': int(response.headers.get('location', '-1'))}
-        self._log('POST Scan Task Result:\n', json.dumps(data, indent=4))
+        self._log(f"POST Scan Task Result:\n{json.dumps(data, indent=4)}")
         return data
 
     def get_scan_task(self, task_id):
         response = self._call_api(f'/scan/{task_id}', 'GET')
         data = response.json()
-        self._log(f'GET Scan Task ({task_id}) Result\n', json.dumps(data, indent=4))
+        self._log(f"GET Scan Task ({task_id}) Result:\n{json.dumps(data, indent=4)}")
         return data
 
     def get_issue_definitions(self):
         response = self._call_api('/knowledge_base/issue_definitions', 'GET')
         data = response.json()
-        self._log('GET Issue Definitions Result\n', json.dumps(data, indent=4))
+        self._log(f"GET Issue Definitions Result:\n{json.dumps(data, indent=4)}")
         return data
 
     def is_alive(self):

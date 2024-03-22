@@ -3,3 +3,5 @@ Flask-Bcrypt
 Flask-SQLAlchemy
 python-dotenv
 requests
+gunicorn
+gevent

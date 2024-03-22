@@ -20,6 +20,9 @@
     hx-get="{{ url_for('core.scans_table') }}"
     hx-trigger="load, watch-refresh-scans from:body"
     hx-swap="innerHTML"
+    hx-ext="sse"
+    sse-connect="/scans/stream"
+    sse-swap="update"
 ></div>
 <dialog
     id="addScanModal"

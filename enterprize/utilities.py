@@ -42,6 +42,6 @@ def burp_scan_builder(callback_url, credentials, configurations, scope_includes,
                 scan_config['scope']['exclude'].append(c)
     if target_urls:
         scan_config['urls'] = []
-        for target_url in target_urls:
+        for target_url in target_urls.split('\n'):
             scan_config['urls'].append(target_url)
     return scan_config
