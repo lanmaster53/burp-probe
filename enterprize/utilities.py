@@ -1,4 +1,4 @@
-def burp_scan_builder(callback_url, credentials, configurations, scope_includes, scope_excludes, asset_urls):
+def burp_scan_builder(callback_url, credentials, configurations, scope_includes, scope_excludes, target_urls):
     scan_config = {
         'scan_callback': {
             'url': callback_url,
@@ -40,8 +40,8 @@ def burp_scan_builder(callback_url, credentials, configurations, scope_includes,
                     'rule': scope_exclude
                 }
                 scan_config['scope']['exclude'].append(c)
-    if asset_urls:
+    if target_urls:
         scan_config['urls'] = []
-        for asset_url in asset_urls:
-            scan_config['urls'].append(asset_url)
+        for target_url in target_urls:
+            scan_config['urls'].append(target_url)
     return scan_config

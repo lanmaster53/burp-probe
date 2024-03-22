@@ -6,16 +6,24 @@
         <meta name="htmx-config" content='{"includeIndicatorStyles": false}' />
         <title>Burp Pro Scan Manager</title>
         <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daisyui@4.7.3/dist/full.min.css" />
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script src="https://unpkg.com/htmx.org@latest/dist/htmx.min.js"></script>
-        <script src="https://unpkg.com/htmx.org@1.9.11/dist/ext/debug.js"></script>
+        <!--link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.min.css" /-->
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/daisyui.min.css') }}" />
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bpsm.css') }}" />
+        <!--script src="https://cdn.tailwindcss.com"></script-->
+        <script src="{{ url_for('static', filename='js/tailwind.min.js') }}"></script>
+        <!--script src="https://unpkg.com/htmx.org@latest/dist/htmx.min.js"></script-->
+        <script src="{{ url_for('static', filename='js/htmx.min.js') }}"></script>
+        <!--script src="https://unpkg.com/htmx.org@latest/dist/ext/debug.js"></script-->
+        <script src="{{ url_for('static', filename='js/htmx-debug.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/bpsm.js') }}"></script>
+
     </head>
     <body>
         {{ render_partial('partials/flash.html') }}
         <header class="shadow-lg relative z-40" style="border-bottom: 3px solid #f63;"><!-- relative prevents content from overlapping header shadow -->
             <nav class="navbar bg-base-100">
-                <div class="flex-1 px-4 py-2"> <!-- brand -->
+                <!-- brand -->
+                <div class="flex-1 px-4 py-2">
                     <a href="{{ url_for('core.home') }}" class="flex items-center text-2xl">
                         <div class="mr-2 p-0.5" style="background-color: #f63;">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="white" class="w-6 h-6">
@@ -25,6 +33,7 @@
                         <span>Burp Pro Scan Manager</span>
                     </a>
                 </div>
+                <!-- end brand -->
                 <div class="flex-none">
                     <div class="dropdown dropdown-end md:hidden">
                         <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
@@ -50,36 +59,5 @@
             {% block body %}{% endblock %}
         </section>
         <footer></footer>
-        <!--script src="{{ url_for('static', filename='js/enterprize.js') }}"></script-->
-        <style>
-            .flash-message-hide {
-                animation: toast-hide 0.25s ease-out
-            }
-            @keyframes toast-hide {
-                0% {
-                    transform: scale(1);
-                    opacity: 1
-                }
-                100% {
-                    transform: scale(0.9);
-                    opacity: 0
-                }
-            }
-        </style>
-        <script>
-            htmx.onLoad(() => {
-                htmx.findAll('.flash-message').forEach((element) => {
-                    if (!element.dying) {
-                        setTimeout(() => {
-                            element.addEventListener("animationend", () => {
-                                element.remove();
-                            })
-                            element.classList.add('flash-message-hide');
-                        }, 5000);
-                        element.dying = true;
-                    };
-                });
-            });
-        </script>
     </body>
 </html>

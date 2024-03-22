@@ -1,0 +1,13 @@
+.flash-message-hide {
+    animation: toast-hide 0.25s ease-out
+}
+@keyframes toast-hide {
+    0% {
+        transform: scale(1);
+        opacity: 1
+    }
+    100% {
+        transform: scale(0.9);
+        opacity: 0
+    }
+}

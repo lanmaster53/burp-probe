@@ -1,12 +1,10 @@
 from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
-from flask_smorest import Api
 from enterprize.helpers import render_partial
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
-api = Api()
 
 def create_app(config):
 
@@ -23,7 +21,6 @@ def create_app(config):
 
     db.init_app(app)
     bcrypt.init_app(app)
-    api.init_app(app)
 
     def finalize(arg):
         if arg is None:
@@ -40,9 +37,6 @@ def create_app(config):
 
     from enterprize.views.core import blp as CoreBlueprint
     app.register_blueprint(CoreBlueprint)
-
-    from enterprize.views.api import blp as ApiBlueprint
-    api.register_blueprint(ApiBlueprint, url_prefix='/api')
 
     @app.cli.command("init")
     def init_data():

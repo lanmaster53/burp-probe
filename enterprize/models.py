@@ -4,6 +4,7 @@ from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime, timezone
 import binascii
+import json
 import uuid
 
 # https://github.com/pallets-eco/flask-sqlalchemy/issues/1140
@@ -23,6 +24,9 @@ class BaseModel(db.Model):
     id: Mapped[str] = mapped_column(db.String(36), primary_key=True, default=get_guid)
     created: Mapped[str] = mapped_column(db.DateTime, nullable=False, default=get_current_utc_time)
 
+    def attr_is_nullable(self, s):
+        return self.__table__.columns[s].nullable
+
     @property
     def created_as_string(self):
         return get_local_from_utc(self.created).strftime("%Y-%m-%d %H:%M:%S")
@@ -34,7 +38,6 @@ class User(BaseModel):
     name: Mapped[str] = mapped_column(db.String(), nullable=False)
     password_hash: Mapped[str] = mapped_column(db.String(), nullable=False)
     type: Mapped[str] = mapped_column(db.String(), nullable=False)
-    #items: Mapped[list['Item']] = relationship('Item', back_populates='user', foreign_keys='Item.user_id', lazy='dynamic')
 
     @property
     def password(self):
@@ -51,47 +54,33 @@ class User(BaseModel):
         return f"<User '{self.email}'>"
 
 
-assets_scans = db.Table(
-  'assets_scans',
-  db.Column('asset_id', db.String(36), db.ForeignKey('assets.id')),
-  db.Column('scan_id', db.String(36), db.ForeignKey('scans.id'))
-)
-
-
-class Asset(BaseModel):
-    __tablename__ = 'assets'
-    url: Mapped[str] = mapped_column(db.String(), nullable=False, unique=True)
-    description: Mapped[str] = mapped_column(db.String(), nullable=False)
-    scans = relationship('Scan', secondary=assets_scans, back_populates='assets')
-
-    def __repr__(self):
-        return f"<Asset '{self.url}'>"
-
-
 class Scan(BaseModel):
     __tablename__ = 'scans'
     name: Mapped[str] = mapped_column(db.String(), nullable=False, unique=True)
-    description: Mapped[str] = mapped_column(db.String(), nullable=False)
-    # from Form input
+    description: Mapped[str] = mapped_column(db.String(), nullable=True)
     configuration: Mapped[str] = mapped_column(db.String(), nullable=True) # JSON config stored as string
-    # from JSON response
-    '''audit_requests_made: Mapped[int] = mapped_column(db.Integer(), nullable=False)
-    crawl_and_audit_caption: Mapped[str] = mapped_column(db.String(), nullable=False)
-    crawl_and_audit_progress: Mapped[int] = mapped_column(db.Integer(), nullable=False)
-    crawl_requests_made: Mapped[int] = mapped_column(db.Integer(), nullable=False)
-    issue_events: Mapped[int] = mapped_column(db.Integer(), nullable=False)
-    total_elapsed_time: Mapped[int] = mapped_column(db.Integer(), nullable=False)
-    scan_status: Mapped[str] = mapped_column(db.String(), nullable=False)'''
     status: Mapped[str] = mapped_column(db.String(), nullable=False)
-    result: Mapped[str] = mapped_column(db.String(), nullable=True)
+    result: Mapped[str] = mapped_column(db.String(), nullable=True) # JSON result stored as a string
     task_id: Mapped[int] = mapped_column(db.Integer(), nullable=True)
     node_id: Mapped[str] = mapped_column(db.String(36), db.ForeignKey('nodes.id'), nullable=False)
     node: Mapped['Node'] = relationship('Node', back_populates='scans', foreign_keys=[node_id])
-    assets = relationship('Asset', secondary=assets_scans, back_populates='scans')
 
     @staticmethod
-    def get_by_node_and_task(node_id, task_id):
-        return Node.query.filter_by(node_id=node_id, task_id=task_id).first()
+    def get_assets():
+        assets = []
+        for scan in Scan.query.all():
+            scan_config = json.loads(scan.configuration)
+            for url in scan_config['urls']:
+                asset = next((a for a in assets if a['url'] == url), None)
+                if asset:
+                    asset['count'] += 1
+                else:
+                    asset = {
+                        'url': url,
+                        'count': 1,
+                    }
+                    assets.append(asset)
+        return assets
 
     def __repr__(self):
         return f"<Scan '{self.name}'>"
@@ -99,9 +88,9 @@ class Scan(BaseModel):
 
 class Node(BaseModel):
     __tablename__ = 'nodes'
-    #__table_args__ = tuple(UniqueConstraint('protocol', 'hostnams', 'port'))
+    #__table_args__ = tuple(UniqueConstraint('protocol', 'hostname', 'port'))
     name: Mapped[str] = mapped_column(db.String(), nullable=False, unique=True)
-    description: Mapped[str] = mapped_column(db.String(), nullable=False)
+    description: Mapped[str] = mapped_column(db.String(), nullable=True)
     protocol: Mapped[str] = mapped_column(db.String(), nullable=False)
     hostname: Mapped[str] = mapped_column(db.String(), nullable=False)
     port: Mapped[str] = mapped_column(db.String(), nullable=False)

@@ -2,17 +2,7 @@
 {% block body %}
 <div class="flex items-center">
     <div class="flex-1"><h1 class="text-xl font-semibold px-2 py-4">Assets</h1></div>
-    <div class="flex-none">
-        <button
-            class="btn btn-circle btn-ghost"
-            hx-get="{{ url_for('core.assets_modal') }}"
-            hx-target="#addAssetModal"
-        >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>              
-        </button>
-    </div>
+    <div class="flex-none"></div>
 </div>
 <div
     class="overflow-x-auto"
@@ -21,9 +11,4 @@
     hx-trigger="load, watch-refresh-assets from:body"
     hx-swap="innerHTML"
 ></div>
-<dialog
-    id="addAssetModal"
-    class="modal"
-    hx-on:htmx:after-swap="this.showModal();"
-></dialog>
 {% endblock %}

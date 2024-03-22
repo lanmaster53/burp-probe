@@ -1,4 +1,3 @@
-# api/schemas.py
 from marshmallow import Schema, fields
 
 # scan configuration schema
@@ -10,7 +9,7 @@ class ScanConfigurationSchema(Schema):
 
 
 class ApplicationLoginSchema(Schema):
-    type = fields.Str(required=True) # always going to be `UsernameAndPasswordLogin`` for now
+    type = fields.Str(required=True) # always going to be `UsernameAndPasswordLogin` for now
     username = fields.Str(required=True)
     password = fields.Str(required=True)
 

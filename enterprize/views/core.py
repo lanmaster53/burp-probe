@@ -3,10 +3,12 @@ from enterprize import db
 from enterprize.decorators import hx_trigger
 from enterprize.helpers import render_partial
 from enterprize.middleware import load_user, modify_response
-from enterprize.models import Asset, Node, Scan
+from enterprize.models import Node, Scan
 from enterprize.services.burp import BurpProApi
 from enterprize.utilities import burp_scan_builder
 import json
+import requests
+import traceback
 
 blp = Blueprint('core', __name__)
 
@@ -42,40 +44,8 @@ def assets():
 def assets_table():
     return render_partial(
         'partials/tables/assets.html',
-        assets=Asset.query.all()
+        assets=Scan.get_assets()
     )
-
-@blp.route('/assets/modal')
-#@login_required
-def assets_modal():
-    return render_partial(
-        'partials/modals/assets.html',
-    )
-
-@blp.route('/assets', methods=['POST'])
-#@login_required
-@hx_trigger('watch-refresh-assets')
-def assets_create():
-    asset = Asset(
-        url=request.form.get('url'),
-        description=request.form.get('description'),
-    )
-    db.session.add(asset)
-    db.session.commit()
-    flash('Asset created.', 'success')
-    return ''
-
-@blp.route('/assets/<string:asset_id>', methods=['DELETE'])
-#@login_required
-@hx_trigger('watch-refresh-assets')
-def assets_delete(asset_id):
-    asset = Asset.query.filter_by(id=asset_id).first()
-    if not asset:
-        abort(404)
-    db.session.delete(asset)
-    db.session.commit()
-    flash('Asset deleted.', 'success')
-    return ''
 
 # endregion
 
@@ -108,12 +78,12 @@ def nodes_modal():
 @hx_trigger('watch-refresh-nodes')
 def nodes_create():
     node = Node(
-        name=request.form.get('name'),
-        description=request.form.get('description'),
-        protocol=request.form.get('protocol'),
-        hostname=request.form.get('hostname'),
-        port=request.form.get('port'),
-        api_key=request.form.get('api_key'),
+        name=request.form.get('name') or None,
+        description=request.form.get('description') or None,
+        protocol=request.form.get('protocol') or None,
+        hostname=request.form.get('hostname') or None,
+        port=request.form.get('port') or None,
+        api_key=request.form.get('api_key') or None,
     )
     db.session.add(node)
     db.session.commit()
@@ -126,7 +96,7 @@ def nodes_create():
 def nodes_delete(node_id):
     node = Node.query.filter_by(id=node_id).first()
     if not node:
-        abort(404)
+        abort(404, 'Node does not exist')
     db.session.delete(node)
     db.session.commit()
     flash('Node deleted.', 'success')
@@ -166,7 +136,6 @@ def scans_table():
 def scans_modal():
     return render_partial(
         'partials/modals/scans.html',
-        assets=Asset.query.all(),
         nodes=Node.get_live_nodes(),
     )
 
@@ -174,23 +143,14 @@ def scans_modal():
 #@login_required
 @hx_trigger('watch-refresh-scans')
 def scans_create():
-    name = request.form.get('name')
-    description = request.form.get('description')
-    credentials = request.form.get('credentials')
-    configurations = request.form.get('configurations')
-    scope_includes = request.form.get('scope_includes')
-    scope_excludes = request.form.get('scope_excludes')
-    asset_ids = request.form.getlist('assets')
-    node_id = request.form.get('node')
-    # resolve asset IDs
-    assets = []
-    for asset_id in asset_ids:
-        asset = Asset.query.filter_by(id=asset_id).first()
-        assets.append(asset)
-    if not assets or len(assets) != len(asset_ids):
-        flash('Invalid asset ID(s).', 'error')
-        return ''
-    asset_urls = [a.url for a in assets]
+    name = request.form.get('name' or None)
+    description = request.form.get('description' or None)
+    credentials = request.form.get('credentials' or None)
+    configurations = request.form.get('configurations' or None)
+    scope_includes = request.form.get('scope_includes' or None)
+    scope_excludes = request.form.get('scope_excludes' or None)
+    target_urls = request.form.get('targets' or None)
+    node_id = request.form.get('node' or None)
     # resolve node ID
     node = Node.query.filter_by(id=node_id).first()
     if not node:
@@ -204,23 +164,23 @@ def scans_create():
         name=name,
         description=description,
         status='created',
-        assets=assets,
         node=node,
     )
     db.session.add(scan)
     db.session.flush()
-    print(scan.id)
     callback_url = url_for('core.scans_callback', scan_id=scan.id, _external=True)
-    scan_config = burp_scan_builder(callback_url, credentials, configurations, scope_includes, scope_excludes, asset_urls)
+    scan_config = burp_scan_builder(callback_url, credentials, configurations, scope_includes, scope_excludes, target_urls)
     current_app.logger.debug(f"Scanner Config:\n{json.dumps(scan_config, indent=4)}")
-    #db.session.rollback()
     burp = BurpProApi(
         protocol=node.protocol,
         hostname=node.hostname,
         port=node.port,
         api_key=node.api_key,
     )
-    response = burp.post_scan_config(scan_config)
+    try:
+        response = burp.post_scan_config(scan_config)
+    except requests.exceptions.HTTPError as e:
+        abort(e.response.status_code)
     scan.configuration = json.dumps(scan_config)
     scan.status = 'started'
     scan.task_id = response['task_id']
@@ -230,7 +190,6 @@ def scans_create():
 
 @blp.route('/scans/<string:scan_id>/callback', methods=['PUT'])
 def scans_callback(scan_id):
-    # TODO: validate with schema
     payload = request.get_json()
     current_app.logger.debug(f"Callback Payload:\n{json.dumps(payload, indent=4)}")
     # update the scan
@@ -246,10 +205,35 @@ def scans_callback(scan_id):
 def scans_delete(scan_id):
     scan = Scan.query.filter_by(id=scan_id).first()
     if not scan:
-        abort(404)
+        abort(404, 'Scan does not exist')
     db.session.delete(scan)
     db.session.commit()
     flash('Scan deleted.', 'success')
     return ''
+
+# endregion
+
+# region error handlers
+
+from werkzeug.exceptions import HTTPException
+
+@blp.app_errorhandler(HTTPException)
+def error_handler(e):
+    if 'HX-Request' in request.headers:
+        message = e.description or e.name
+        flash(message, 'error')
+        return '', e.code
+    else:
+        return e
+
+@blp.app_errorhandler(Exception)
+def internal_server_error(e):
+    if 'HX-Request' in request.headers:
+        current_app.logger.error(traceback.format_exc())
+        message = 'Internal server error.'
+        flash(message, 'error')
+        return '', 500
+    else:
+        return e
 
 # endregion

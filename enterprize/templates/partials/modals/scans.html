@@ -9,26 +9,21 @@
         hx-swap="none"
         hx-on::after-request="this.reset();addScanModal.close()"
     >
-        <div class="label"><span class="label-text">Name</span></div>
+        <div class="label"><span class="label-text">Name*</span></div>
         <input name="name" type="text" placeholder="Enter a unique name." class="input input-bordered" />
         <div class="label"><span class="label-text">Description</span></div>
-        <input name="description" type="text" placeholder="Enter a description." class="input input-bordered" />
+        <input name="description" type="text" placeholder="Enter a brief description." class="input input-bordered" />
         <div class="label"><span class="label-text">Credentials</span></div>
-        <textarea name="credentials" class="textarea textarea-bordered" placeholder="Enter a list of credntials. i.e. root:123456"></textarea>
+        <textarea name="credentials" class="textarea textarea-bordered" placeholder="Enter a list of credentials. i.e. root:123456"></textarea>
         <div class="label"><span class="label-text">Configurations</span></div>
-        <textarea name="configurations" class="textarea textarea-bordered" placeholder="Enter a list of configuration names.">Crawl Only</textarea>
+        <textarea name="configurations" class="textarea textarea-bordered" placeholder="Enter a list of configuration names."></textarea>
+        <div class="label"><span class="label-text">Target URLs*</span></div>
+        <textarea name="targets" class="textarea textarea-bordered" placeholder="Enter a list of target URLs."></textarea>
         <div class="label"><span class="label-text">Scope Inclusions</span></div>
-        <textarea name="scope_includes" class="textarea textarea-bordered" placeholder="Enter a list of URLs."></textarea>
+        <textarea name="scope_includes" class="textarea textarea-bordered" placeholder="Enter a list of URLs to include in scope (target URLs are automatically added)."></textarea>
         <div class="label"><span class="label-text">Scope Exclusions</span></div>
-        <textarea name="scope_excludes" class="textarea textarea-bordered" placeholder="Enter a list of URLs."></textarea>
-        <div class="label"><span class="label-text">Assets</span></div>
-        <select name="assets" class="select select-bordered" multiple>
-            <!--option disabled selected>Select one or more assets to scan.</option-->
-        {% for asset in assets %}
-            <option value="{{ asset.id }}">{{ asset.url }}</option>
-        {% endfor %}
-        </select>
-        <div class="label"><span class="label-text">Node</span></div>
+        <textarea name="scope_excludes" class="textarea textarea-bordered" placeholder="Enter a list of URLs to exclude from scope."></textarea>
+        <div class="label"><span class="label-text">Node*</span></div>
         <select name="node" class="select select-bordered">
             <!--option disabled selected>Select an available scanning node.</option-->
         {% for node in nodes %}
