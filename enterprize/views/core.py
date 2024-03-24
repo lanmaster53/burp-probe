@@ -188,20 +188,6 @@ def scans_create():
     flash('Scan created.', 'success')
     return ''
 
-# https://mathspp.com/blog/streaming-data-from-flask-to-htmx-using-server-side-events
-
-from enterprize import myqueue
-
-@blp.route("/scans/stream")
-def publish_hello():
-    def stream():
-        while True:
-            content = myqueue.get().replace('\n', '')
-            msg = 'event: update\n'
-            msg += f"data: {content}\n\n"
-            yield msg
-    return Response(stream(), mimetype="text/event-stream")
-
 @blp.route('/scans/<string:scan_id>/callback', methods=['PUT'])
 def scans_callback(scan_id):
     payload = request.get_json()
@@ -211,11 +197,6 @@ def scans_callback(scan_id):
     scan.result = json.dumps(payload)
     scan.status = payload.get('scan_status')
     db.session.commit()
-    content = render_partial(
-        'partials/tables/scans.html',
-        scans=Scan.query.all(),
-    )
-    myqueue.put(content)
     return '', 204
 
 @blp.route('/scans/<string:scan_id>', methods=['DELETE'])

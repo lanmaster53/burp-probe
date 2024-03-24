@@ -2,11 +2,9 @@ from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 from enterprize.helpers import render_partial
-from queue import Queue
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
-myqueue = Queue()
 
 def create_app(config):
 

@@ -18,11 +18,8 @@
     class="overflow-x-auto"
     id="scans"
     hx-get="{{ url_for('core.scans_table') }}"
-    hx-trigger="load, watch-refresh-scans from:body"
+    hx-trigger="load, every 10s, watch-refresh-scans from:body"
     hx-swap="innerHTML"
-    hx-ext="sse"
-    sse-connect="/scans/stream"
-    sse-swap="update"
 ></div>
 <dialog
     id="addScanModal"
