@@ -88,29 +88,29 @@ def nodes_create():
     db.session.add(node)
     db.session.commit()
     flash('Node created.', 'success')
-    return ''
+    return '', 201
 
 @blp.route('/nodes/<string:node_id>', methods=['DELETE'])
 #@login_required
 @hx_trigger('watch-refresh-nodes')
 def nodes_delete(node_id):
-    node = Node.query.filter_by(id=node_id).first()
+    node = Node.query.get(node_id)
     if not node:
-        abort(404, 'Node does not exist')
+        abort(404, description='Node does not exist.')
     db.session.delete(node)
     db.session.commit()
     flash('Node deleted.', 'success')
-    return ''
+    return '', 200
 
 @blp.route('/nodes/<string:node_id>/test')
 #@login_required
 def nodes_test(node_id):
-    node = Node.query.filter_by(id=node_id).first()
+    node = Node.query.get(node_id)
     if node.is_alive:
         flash('Node is available.', 'success')
     else:
         flash('Node is not available.', 'warning')
-    return ''
+    return '', 200
 
 # endregion
 
@@ -152,13 +152,11 @@ def scans_create():
     target_urls = request.form.get('targets' or None)
     node_id = request.form.get('node' or None)
     # resolve node ID
-    node = Node.query.filter_by(id=node_id).first()
+    node = Node.query.get(node_id)
     if not node:
-        flash('Invalid node ID.', 'error')
-        return ''
+        abort(400, description='Invalid node ID.')
     if not node.is_alive:
-        flash('Scanner node is not available.', 'error')
-        return ''
+        abort(404, description='Node is not available.')
     # build and run the scan
     scan = Scan(
         name=name,
@@ -179,14 +177,14 @@ def scans_create():
     )
     try:
         response = burp.post_scan_config(scan_config)
-    except requests.exceptions.HTTPError as e:
-        abort(e.response.status_code)
+    except requests.exceptions.RequestException as e:
+        abort(500, description='Scan initialization failed.')
     scan.configuration = json.dumps(scan_config)
     scan.status = 'started'
     scan.task_id = response['task_id']
     db.session.commit()
-    flash('Scan created.', 'success')
-    return ''
+    flash('Scan initialized.', 'success')
+    return '', 201
 
 @blp.route('/scans/<string:scan_id>/callback', methods=['PUT'])
 def scans_callback(scan_id):
@@ -199,17 +197,39 @@ def scans_callback(scan_id):
     db.session.commit()
     return '', 204
 
+@blp.route('/scans/<string:scan_id>/sync')
+#@login_required
+@hx_trigger('watch-refresh-scans')
+def scans_sync(scan_id):
+    scan = Scan.query.get(scan_id)
+    if not scan:
+        abort(404, description='Scan does not exist.')
+    if not scan.node.is_alive:
+        abort(404, description='Node is not available.')
+    burp = BurpProApi(
+        protocol=scan.node.protocol,
+        hostname=scan.node.hostname,
+        port=scan.node.port,
+        api_key=scan.node.api_key,
+    )
+    try:
+        response = burp.get_scan_task(scan.task_id)
+    except requests.exceptions.RequestException as e:
+        abort(500, description='Scan synchronization failed.')
+    flash('Scan synchronized.', 'success')
+    return '', 200
+
 @blp.route('/scans/<string:scan_id>', methods=['DELETE'])
 #@login_required
 @hx_trigger('watch-refresh-scans')
 def scans_delete(scan_id):
-    scan = Scan.query.filter_by(id=scan_id).first()
+    scan = Scan.query.get(scan_id)
     if not scan:
-        abort(404, 'Scan does not exist')
+        abort(404, description='Scan does not exist.')
     db.session.delete(scan)
     db.session.commit()
     flash('Scan deleted.', 'success')
-    return ''
+    return '', 200
 
 # endregion
 
@@ -220,7 +240,7 @@ from werkzeug.exceptions import HTTPException
 @blp.app_errorhandler(HTTPException)
 def error_handler(e):
     if 'HX-Request' in request.headers:
-        message = e.description or e.name
+        message = e.description
         flash(message, 'error')
         return '', e.code
     else:

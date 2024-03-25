@@ -8,13 +8,13 @@ document.addEventListener("DOMContentLoaded", (event) => {
 });
 
 htmx.onLoad(() => {
-    htmx.findAll('.flash-message').forEach((element) => {
+    htmx.findAll(".flash-message").forEach((element) => {
         if (!element.dying) {
             setTimeout(() => {
                 element.addEventListener("animationend", () => {
                     element.remove();
                 });
-                element.classList.add('flash-message-hide');
+                element.classList.add("flash-message-hide");
             }, 5000);
             element.dying = true;
         };

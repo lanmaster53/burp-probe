@@ -1,9 +1,9 @@
 def burp_scan_builder(callback_url, credentials, configurations, scope_includes, scope_excludes, target_urls):
-    scan_config = {
-        'scan_callback': {
+    scan_config = {}
+    if callback_url:
+        scan_config['scan_callback'] = {
             'url': callback_url,
         }
-    }
     if credentials:
         scan_config['application_logins'] = []
         for credential in credentials.split('\n'):
