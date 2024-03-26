@@ -1,22 +1,11 @@
 from burp_probe import db, bcrypt
 from burp_probe.services.burp import BurpProApi
-from sqlalchemy import UniqueConstraint
+from burp_probe.utilities import get_guid, get_current_utc_time, get_local_from_utc
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from datetime import datetime, timezone
 import binascii
 import json
-import uuid
 
 # https://github.com/pallets-eco/flask-sqlalchemy/issues/1140
-
-def get_current_utc_time():
-    return datetime.now(timezone.utc)
-
-def get_local_from_utc(dtg):
-    return dtg.replace(tzinfo=timezone.utc).astimezone(tz=None)
-
-def get_guid():
-    return str(uuid.uuid4())
 
 
 class BaseModel(db.Model):
@@ -64,6 +53,10 @@ class Scan(BaseModel):
     task_id: Mapped[int] = mapped_column(db.Integer(), nullable=True)
     node_id: Mapped[str] = mapped_column(db.String(36), db.ForeignKey('nodes.id'), nullable=False)
     node: Mapped['Node'] = relationship('Node', back_populates='scans', foreign_keys=[node_id])
+
+    @property
+    def result_as_json(self):
+        return json.loads(self.result)
 
     @staticmethod
     def get_assets():

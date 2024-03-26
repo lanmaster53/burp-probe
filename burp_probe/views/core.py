@@ -5,7 +5,7 @@ from burp_probe.helpers import render_partial
 from burp_probe.middleware import load_user, modify_response
 from burp_probe.models import Node, Scan
 from burp_probe.services.burp import BurpProApi
-from burp_probe.utilities import burp_scan_builder
+from burp_probe.utilities import burp_scan_builder, BurpScanParser
 import json
 import requests
 import traceback
@@ -218,6 +218,19 @@ def scans_sync(scan_id):
         abort(500, description='Scan synchronization failed.')
     flash('Scan synchronized.', 'success')
     return '', 200
+
+@blp.route('/scans/<string:scan_id>')
+#@login_required
+def scan(scan_id):
+    scan = Scan.query.get(scan_id)
+    if not scan:
+        abort(404, description='Scan does not exist.')
+    parsed_scan = BurpScanParser(scan)
+    #import pdb;pdb.set_trace()
+    return render_template(
+        'pages/scan.html',
+        parsed_scan=parsed_scan,
+    )
 
 @blp.route('/scans/<string:scan_id>', methods=['DELETE'])
 #@login_required

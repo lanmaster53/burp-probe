@@ -3,3 +3,4 @@ Flask-Bcrypt
 Flask-SQLAlchemy
 python-dotenv
 requests
+humanize

@@ -2,6 +2,7 @@ from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 from burp_probe.helpers import render_partial
+import json
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
@@ -10,7 +11,7 @@ def create_app(config):
 
     app = Flask(__name__, static_url_path='')
     app.config.from_object('burp_probe.config.{}'.format(config.title()))
-    app.logger.info(f"Burp Enterprize starting in {config} mode.")
+    app.logger.info(f"Burp Probe starting in {config} mode.")
 
     app.config["API_TITLE"] = "Test REST API"
     app.config["API_VERSION"] = "v1"
@@ -34,6 +35,13 @@ def create_app(config):
     app.jinja_env.lstrip_blocks = True
 
     app.add_template_global(render_partial)
+
+    @app.template_filter('ppjson')
+    def ppjson_filter(data):
+        '''
+        Use: {{ json_string|ppjson }}
+        '''
+        return json.dumps(json.loads(data), indent=4)
 
     from burp_probe.views.core import blp as CoreBlueprint
     app.register_blueprint(CoreBlueprint)

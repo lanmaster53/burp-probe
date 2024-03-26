@@ -1,0 +1,12 @@
+{% extends "shared/layout.html" %}
+{% block body %}
+<div class="flex">
+    <pre class="flex-1">{{ parsed_scan.scan.result|ppjson }}</pre>
+    <div class="flex-col">
+        <div>{{ parsed_scan.status }}</div>
+        <div>{{ parsed_scan.start_time }}</div>
+        <div>{{ parsed_scan.end_time }}</div>
+        <div>{{ parsed_scan.duration }}</div>
+    </div>
+</div>
+{% endblock %}
