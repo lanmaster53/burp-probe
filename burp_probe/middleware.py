@@ -1,6 +1,6 @@
 from flask import g, session, request
-from enterprize.helpers import render_partial
-from enterprize.models import User
+from burp_probe.helpers import render_partial
+from burp_probe.models import User
 
 # request middleware
 

@@ -1,5 +1,5 @@
 from flask import g, request, abort, redirect, url_for, make_response
-from enterprize.constants import UserTypes
+from burp_probe.constants import UserTypes
 from functools import wraps
 
 def login_required(func):

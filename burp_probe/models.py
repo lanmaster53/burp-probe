@@ -1,5 +1,5 @@
-from enterprize import db, bcrypt
-from enterprize.services.burp import BurpProApi
+from burp_probe import db, bcrypt
+from burp_probe.services.burp import BurpProApi
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime, timezone

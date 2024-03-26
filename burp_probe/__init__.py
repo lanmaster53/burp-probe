@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
-from enterprize.helpers import render_partial
+from burp_probe.helpers import render_partial
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
@@ -9,7 +9,7 @@ bcrypt = Bcrypt()
 def create_app(config):
 
     app = Flask(__name__, static_url_path='')
-    app.config.from_object('enterprize.config.{}'.format(config.title()))
+    app.config.from_object('burp_probe.config.{}'.format(config.title()))
     app.logger.info(f"Burp Enterprize starting in {config} mode.")
 
     app.config["API_TITLE"] = "Test REST API"
@@ -35,12 +35,12 @@ def create_app(config):
 
     app.add_template_global(render_partial)
 
-    from enterprize.views.core import blp as CoreBlueprint
+    from burp_probe.views.core import blp as CoreBlueprint
     app.register_blueprint(CoreBlueprint)
 
     @app.cli.command("init")
     def init_data():
-        from enterprize import models
+        from burp_probe import models
         db.create_all()
         # initialization logic here (optional)
         app.logger.info('Database initialized.')

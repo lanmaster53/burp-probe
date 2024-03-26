@@ -1,11 +1,11 @@
 from flask import Blueprint, current_app, request, redirect, url_for, flash, render_template, abort, Response
-from enterprize import db
-from enterprize.decorators import hx_trigger
-from enterprize.helpers import render_partial
-from enterprize.middleware import load_user, modify_response
-from enterprize.models import Node, Scan
-from enterprize.services.burp import BurpProApi
-from enterprize.utilities import burp_scan_builder
+from burp_probe import db
+from burp_probe.decorators import hx_trigger
+from burp_probe.helpers import render_partial
+from burp_probe.middleware import load_user, modify_response
+from burp_probe.models import Node, Scan
+from burp_probe.services.burp import BurpProApi
+from burp_probe.utilities import burp_scan_builder
 import json
 import requests
 import traceback

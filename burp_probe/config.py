@@ -6,7 +6,7 @@ DATADIR = os.path.join(BASEDIR, '../data')
 
 class BaseConfig(object):
 
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(DATADIR, 'enterprize.db')
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(DATADIR, 'burp-probe.db')
 
 
 class Development(BaseConfig):

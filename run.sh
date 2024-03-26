@@ -1,4 +1,4 @@
 source ~/.zshrc
-venv_activate enterprize
+venv_activate burp-probe
 flask run $@
 deactivate

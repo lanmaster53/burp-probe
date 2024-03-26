@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from enterprize import create_app
+from burp_probe import create_app
 import os
 
 app = create_app(os.environ.get('CONFIG', 'Development'))

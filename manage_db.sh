@@ -1,4 +1,4 @@
-rm ./data/enterprize.db
+rm ./data/burp-probe.db
 flask init
-sqlite3 ./data/enterprize.db < migrate.sql
+sqlite3 ./data/burp-probe.db < migrate.sql
 flask migrate
