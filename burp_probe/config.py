@@ -7,7 +7,7 @@ DATADIR = os.path.join(BASEDIR, '../data')
 class BaseConfig(object):
 
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(DATADIR, 'burp-probe.db')
-
+    SCHEDULER_API_ENABLED = False
 
 class Development(BaseConfig):
 

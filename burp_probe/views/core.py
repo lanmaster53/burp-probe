@@ -166,7 +166,7 @@ def scans_create():
     )
     db.session.add(scan)
     db.session.flush()
-    callback_url = url_for('core.scans_callback', scan_id=scan.id, _external=True)
+    callback_url = None
     scan_config = burp_scan_builder(callback_url, credentials, configurations, scope_includes, scope_excludes, target_urls)
     current_app.logger.debug(f"Scanner Config:\n{json.dumps(scan_config, indent=4)}")
     burp = BurpProApi(
@@ -185,17 +185,6 @@ def scans_create():
     db.session.commit()
     flash('Scan initialized.', 'success')
     return '', 201
-
-@blp.route('/scans/<string:scan_id>/callback', methods=['PUT'])
-def scans_callback(scan_id):
-    payload = request.get_json()
-    current_app.logger.debug(f"Callback Payload:\n{json.dumps(payload, indent=4)}")
-    # update the scan
-    scan = Scan.query.get(scan_id)
-    scan.result = json.dumps(payload)
-    scan.status = payload.get('scan_status')
-    db.session.commit()
-    return '', 204
 
 @blp.route('/scans/<string:scan_id>/sync')
 #@login_required

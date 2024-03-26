@@ -1,11 +1,13 @@
 from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
+from flask_apscheduler import APScheduler
 from burp_probe.helpers import render_partial
 import json
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
+scheduler = APScheduler()
 
 def create_app(config):
 
@@ -22,6 +24,10 @@ def create_app(config):
 
     db.init_app(app)
     bcrypt.init_app(app)
+    scheduler.init_app(app)
+    scheduler.start()
+
+    from burp_probe.tasks import scan_sync
 
     def finalize(arg):
         if arg is None:

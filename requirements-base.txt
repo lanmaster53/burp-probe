@@ -1,6 +1,7 @@
 Flask
 Flask-Bcrypt
 Flask-SQLAlchemy
+Flask-APScheduler
 python-dotenv
 requests
 humanize
