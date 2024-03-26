@@ -4,13 +4,13 @@ from burp_probe.models import Scan
 from burp_probe.services.burp import BurpProApi
 import json
 import requests
-import traceback
 
 DEAD_STATES = ['failed', 'cancelled', 'succeeded']
 
-@scheduler.task('interval', id='sync_scan', seconds=10, misfire_grace_time=900)
+@scheduler.task('interval', id='scan_sync', seconds=30, misfire_grace_time=900)
 def scan_sync():
     with scheduler.app.app_context():
+        current_app.logger.debug('[Scan Sync Task] Task running.')
         scans = Scan.query.all()
         for scan in scans:
             if scan.status not in DEAD_STATES:
