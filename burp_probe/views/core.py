@@ -213,9 +213,14 @@ def scans_sync(scan_id):
         api_key=scan.node.api_key,
     )
     try:
-        response = burp.get_scan_task(scan.task_id)
+        payload = burp.get_scan_task(scan.task_id)
     except requests.exceptions.RequestException as e:
         abort(500, description='Scan synchronization failed.')
+    current_app.logger.debug(f"Scan Sync Payload:\n{json.dumps(payload, indent=4)}")
+    # update the scan
+    scan.result = json.dumps(payload)
+    scan.status = payload.get('scan_status')
+    db.session.commit()
     flash('Scan synchronized.', 'success')
     return '', 200
 
