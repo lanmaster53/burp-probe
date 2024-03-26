@@ -59,7 +59,7 @@ class BurpProApi:
     def is_alive(self):
         try:
             self._log(f"Burp API URL: {self.url}")
-            response = requests.head(self.url)
+            response = requests.get(self.url)
             response.raise_for_status()
             return True
         except requests.exceptions.RequestException as e:
