@@ -15,13 +15,6 @@ def create_app(config):
     app.config.from_object('burp_probe.config.{}'.format(config.title()))
     app.logger.info(f"Burp Probe starting in {config} mode.")
 
-    app.config["API_TITLE"] = "Test REST API"
-    app.config["API_VERSION"] = "v1"
-    app.config["OPENAPI_VERSION"] = "3.1.0"
-    app.config["OPENAPI_URL_PREFIX"] = "/"
-    app.config["OPENAPI_SWAGGER_UI_PATH"] = "/swagger-ui"
-    app.config["OPENAPI_SWAGGER_UI_URL"] = "https://cdn.jsdelivr.net/npm/swagger-ui-dist/"
-
     db.init_app(app)
     bcrypt.init_app(app)
     scheduler.init_app(app)
@@ -52,14 +45,14 @@ def create_app(config):
     from burp_probe.views.core import blp as CoreBlueprint
     app.register_blueprint(CoreBlueprint)
 
-    @app.cli.command("init")
+    @app.cli.command('init')
     def init_data():
         from burp_probe import models
         db.create_all()
         # initialization logic here (optional)
         app.logger.info('Database initialized.')
 
-    @app.cli.command("migrate")
+    @app.cli.command('migrate')
     def migrate_data():
         # migration logic here
         app.logger.info('Migration complete.')
