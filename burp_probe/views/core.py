@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, request, redirect, url_for, flash, render_template, abort, Response
+from flask import Blueprint, current_app, request, redirect, url_for, flash, render_template, abort
 from burp_probe import db
 from burp_probe.decorators import hx_trigger
 from burp_probe.helpers import render_partial
@@ -185,33 +185,6 @@ def scans_create():
     db.session.commit()
     flash('Scan initialized.', 'success')
     return '', 201
-
-@blp.route('/scans/<string:scan_id>/sync')
-#@login_required
-@hx_trigger('watch-refresh-scans')
-def scans_sync(scan_id):
-    scan = Scan.query.get(scan_id)
-    if not scan:
-        abort(404, description='Scan does not exist.')
-    if not scan.node.is_alive:
-        abort(404, description='Node is not available.')
-    burp = BurpProApi(
-        protocol=scan.node.protocol,
-        hostname=scan.node.hostname,
-        port=scan.node.port,
-        api_key=scan.node.api_key,
-    )
-    try:
-        payload = burp.get_scan_task(scan.task_id)
-    except requests.exceptions.RequestException as e:
-        abort(500, description='Scan synchronization failed.')
-    current_app.logger.debug(f"Scan Sync Payload:\n{json.dumps(payload, indent=4)}")
-    # update the scan
-    scan.result = json.dumps(payload)
-    scan.status = payload.get('scan_status')
-    db.session.commit()
-    flash('Scan synchronized.', 'success')
-    return '', 200
 
 @blp.route('/scans/<string:scan_id>')
 #@login_required
