@@ -1,11 +1,12 @@
 from flask import Blueprint, current_app, request, redirect, url_for, flash, render_template, abort
 from burp_probe import db
+from burp_probe.constants import ScanStates
 from burp_probe.decorators import hx_trigger
 from burp_probe.helpers import render_partial
 from burp_probe.middleware import load_user, modify_response
 from burp_probe.models import Node, Scan
 from burp_probe.services.burp import BurpProApi
-from burp_probe.utilities import burp_scan_builder, BurpScanParser
+from burp_probe.utilities import burp_scan_builder, BurpIssueParser
 import json
 import requests
 import traceback
@@ -37,6 +38,7 @@ def home():
 def assets():
     return render_template(
         'pages/assets.html',
+        assets=Scan.get_assets(),
 )
 
 @blp.route('/assets/table')
@@ -44,7 +46,7 @@ def assets():
 def assets_table():
     return render_partial(
         'partials/tables/assets.html',
-        assets=Scan.get_assets()
+        assets=Scan.get_assets(),
     )
 
 # endregion
@@ -56,6 +58,7 @@ def assets_table():
 def nodes():
     return render_template(
         'pages/nodes.html',
+        nodes=Node.query.all(),
     )
 
 @blp.route('/nodes/table')
@@ -63,7 +66,7 @@ def nodes():
 def nodes_table():
     return render_partial(
         'partials/tables/nodes.html',
-        nodes=Node.query.all()
+        nodes=Node.query.all(),
     )
 
 @blp.route('/nodes/modal')
@@ -94,8 +97,7 @@ def nodes_create():
 #@login_required
 @hx_trigger('watch-refresh-nodes')
 def nodes_delete(node_id):
-    node = Node.query.get(node_id)
-    if not node:
+    if not (node := Node.query.get(node_id)):
         abort(404, description='Node does not exist.')
     db.session.delete(node)
     db.session.commit()
@@ -104,6 +106,7 @@ def nodes_delete(node_id):
 
 @blp.route('/nodes/<string:node_id>/test')
 #@login_required
+@hx_trigger('watch-refresh-nodes')
 def nodes_test(node_id):
     node = Node.query.get(node_id)
     if node.is_alive:
@@ -121,6 +124,7 @@ def nodes_test(node_id):
 def scans():
     return render_template(
         'pages/scans.html',
+        scans=Scan.query.all(),
     )
 
 @blp.route('/scans/table')
@@ -152,8 +156,7 @@ def scans_create():
     target_urls = request.form.get('targets' or None)
     node_id = request.form.get('node' or None)
     # resolve node ID
-    node = Node.query.get(node_id)
-    if not node:
+    if not (node := Node.query.get(node_id)):
         abort(400, description='Invalid node ID.')
     if not node.is_alive:
         abort(404, description='Node is not available.')
@@ -180,36 +183,77 @@ def scans_create():
     except requests.exceptions.RequestException as e:
         abort(500, description='Scan initialization failed.')
     scan.configuration = json.dumps(scan_config)
-    scan.status = 'started'
+    scan.status = ScanStates.STARTED
     scan.task_id = response['task_id']
     db.session.commit()
     flash('Scan initialized.', 'success')
     return '', 201
 
+# endregion
+
+# region scan
+
 @blp.route('/scans/<string:scan_id>')
 #@login_required
 def scan(scan_id):
-    scan = Scan.query.get(scan_id)
-    if not scan:
+    if not (scan := Scan.query.get(scan_id)):
         abort(404, description='Scan does not exist.')
-    parsed_scan = BurpScanParser(scan)
-    #import pdb;pdb.set_trace()
     return render_template(
         'pages/scan.html',
-        parsed_scan=parsed_scan,
+        scan=scan,
+    )
+
+@blp.route('/scans/<string:scan_id>/header')
+#@login_required
+def scan_header(scan_id):
+    if not (scan := Scan.query.get(scan_id)):
+        abort(404, description='Scan does not exist.')
+    return render_partial(
+        'partials/headers/scan.html',
+        scan=scan,
     )
 
 @blp.route('/scans/<string:scan_id>', methods=['DELETE'])
 #@login_required
 @hx_trigger('watch-refresh-scans')
 def scans_delete(scan_id):
-    scan = Scan.query.get(scan_id)
-    if not scan:
+    if not (scan := Scan.query.get(scan_id)):
         abort(404, description='Scan does not exist.')
     db.session.delete(scan)
     db.session.commit()
     flash('Scan deleted.', 'success')
     return '', 200
+
+# endregion
+
+# region issues
+
+@blp.route('/scans/<string:scan_id>/issues/table')
+#@login_required
+def issues_table(scan_id):
+    if not (scan := Scan.query.get(scan_id)):
+        abort(404, description='Scan does not exist.')
+    return render_partial(
+        'partials/tables/issues.html',
+        scan=scan,
+    )
+
+# endregion
+
+# region issue
+
+@blp.route('/scans/<string:scan_id>/issues/<string:issue_id>')
+#@login_required
+def issue(scan_id, issue_id):
+    if not (scan := Scan.query.get(scan_id)):
+        abort(404, description='Scan does not exist.')
+    if not (issue_event := scan.get_issue_by_id(issue_id)):
+        abort(404, description='Issue does not exist.')
+    issue_event['parsed'] = BurpIssueParser(issue_event)
+    return render_template(
+        'pages/issue.html',
+        issue_event=issue_event,
+    )
 
 # endregion
 

@@ -1,7 +1,7 @@
 {% extends "shared/layout.html" %}
 {% block body %}
 <div class="flex items-center">
-    <div class="flex-1"><h1 class="text-xl font-semibold px-2 py-4">Nodes</h1></div>
+    <div class="flex-1"><h1 class="text-2xl font-medium px-2 py-4">Nodes</h1></div>
     <div class="flex-none">
         <button
             class="btn btn-circle btn-ghost"
@@ -16,11 +16,12 @@
 </div>
 <div
     class="overflow-x-auto"
-    id="nodes"
     hx-get="{{ url_for('core.nodes_table') }}"
-    hx-trigger="load, watch-refresh-nodes from:body"
+    hx-trigger="every 30s, watch-refresh-nodes from:body"
     hx-swap="innerHTML"
-></div>
+>
+{{ render_partial('partials/tables/nodes.html', nodes=nodes) }}
+</div>
 <dialog
     id="addNodeModal"
     class="modal"

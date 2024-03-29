@@ -40,7 +40,9 @@ def create_app(config):
         '''
         Use: {{ json_string|ppjson }}
         '''
-        return json.dumps(json.loads(data), indent=4)
+        if type(data) == str:
+            data = json.loads(data)
+        return json.dumps(data, indent=4)
 
     from burp_probe.views.core import blp as CoreBlueprint
     app.register_blueprint(CoreBlueprint)

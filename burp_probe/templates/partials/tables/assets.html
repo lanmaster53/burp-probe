@@ -3,7 +3,7 @@
         <tr>
             <th>URL</th>
             <th>Scans</th>
-            <th></th>
+            <th class="text-right"></th>
         </tr>
     </thead>
     <tbody>
@@ -12,12 +12,14 @@
         <tr>
             <td><code>{{ asset.url }}</code></td>
             <td>{{ asset.count }}</td>
-            <td></td>
+            <td>
+                <div class="flex justify-end"></div>
+            </td>
         </tr>
     {% endfor %}
     {% else %}
         <tr>
-            <td class="text-center" colspan="4">No assets found. Click "+" to add one.</td>
+            <td class="text-center" colspan="4">No assets found.</td>
         </tr>
     {% endif %}
     </tbody>

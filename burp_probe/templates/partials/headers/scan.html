@@ -1,0 +1,26 @@
+{% from "shared/macros.html" import status_svg %}
+<div class="my-4 p-4 flex flex-col md:flex-row justify-around rounded-lg bg-gray-100">
+    <div class="basis-1/4 flex flex-col pr-0 md:pr-4 pb-4 md:pb-0 border-r-0 md:border-r border-b md:border-b-0 border-gray-300">
+        <div class="flex items-center justify-center">
+            <div class="pr-4">
+                {{ status_svg(scan, size=10) }}
+            </div>
+            <div class="flex flex-col items-start">
+                <div>Status</div>
+                <div class="font-medium">{{ scan.status|capitalize }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="basis-1/4 flex flex-col items-center pt-4 md:pt-0 pl-0 md:pl-4 pr-0 md:pr-4 pb-4 md:pb-0 border-r-0 md:border-r border-b md:border-b-0 border-gray-300">
+        <div>Start Time</div>
+        <div class="font-medium">{{ scan.parsed.start_time|capitalize }}</div>
+    </div>
+    <div class="basis-1/4 flex flex-col items-center pt-4 md:pt-0 pl-0 md:pl-4 pr-0 md:pr-4 pb-4 md:pb-0 border-r-0 md:border-r border-b md:border-b-0 border-gray-300">
+        <div>End Time</div>
+        <div class="font-medium">{{ scan.parsed.end_time|capitalize }}</div>
+    </div>
+    <div class="basis-1/4 flex flex-col items-center pt-4 md:pt-0 pl-0 md:pl-4">
+        <div>Duration</div>
+        <div class="font-medium">{{ scan.parsed.duration }}</div>
+    </div>
+</div>

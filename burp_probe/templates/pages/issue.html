@@ -1,0 +1,93 @@
+{% from "shared/macros.html" import accordion, severity_svg %}
+{% extends "shared/layout.html" %}
+{% block body %}
+<div class="flex items-center">
+    <div class="flex-1"><h1 class="text-2xl font-medium px-2 py-4">{{ issue_event.issue.name }}</h1></div>
+    <div class="flex-none"></div>
+</div>
+<div class="my-4 p-4 flex flex-col md:flex-row justify-around rounded-lg bg-gray-100">
+    <div class="basis-1/4 flex flex-col pr-0 md:pr-4 pb-4 md:pb-0 border-r-0 md:border-r border-b md:border-b-0 border-gray-300">
+        <span class="pb-2 font-medium">Severity</span>
+        <div class="flex items-center justify-start">
+            <div class="pr-4">
+                {{ severity_svg(issue_event.issue.severity, issue_event.issue.confidence, size=12) }}
+            </div>
+            <div class="flex flex-col items-start mr-4">
+                <div>Severity:</div>
+                <div>Confidence:</div>
+            </div>
+            <div class="flex flex-col items-start font-medium">
+                <div>{{ issue_event.issue.severity|capitalize }}</div>
+                <div>{{ issue_event.issue.confidence|capitalize }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="basis-3/4 flex flex-col pt-4 md:pt-0 pl-0 md:pl-4">
+        <span class="pb-2 font-medium">Location</span>
+        <div class="flex items-center justify-start">
+            <div class="flex flex-col items-start mr-4">
+                <div>Host:</div>
+                <div>Path:</div>
+            </div>
+            <div class="flex flex-col items-start font-medium">
+                <div><code>{{ issue_event.issue.origin }}</code></div>
+                <div><code>{{ issue_event.issue.path }}</code></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="flex flex-col gap-4">
+    {{ accordion('Description', issue_event.issue.description)}}
+    {{ accordion('Background', issue_event.issue.issue_background)}}
+    {{ accordion('Remediation', issue_event.issue.remediation_background)}}
+    {% for exhibit in issue_event.parsed.exhibits %}
+    {{ accordion(exhibit.title, exhibit.content)}}
+    {% endfor %}
+</div>
+<style>
+/* Issue accordion functionality */
+.bp-accordion-trigger {
+    position: absolute;
+    opacity: 0;
+    z-index: -1;
+}
+.bp-accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.5s;
+}
+.bp-accordion-trigger:checked ~ .bp-accordion-content {
+    max-height: 100rem;
+    overflow-y: scroll;
+}
+/* Accordion arrow animation */
+.bp-accordion-label svg {
+    transform: rotate(0deg);
+    transition: all 0.5s;
+}
+.bp-accordion-trigger:checked + .bp-accordion-label svg {
+    transform: rotate(90deg);
+}
+/* Issue content where Tailwind is unavailable */
+.bp-issue-content {
+    padding: 0 !important;
+    div {
+        padding: 1rem;
+        border-top-width: 1px;
+        /* add margin to everything for spacing */
+        /* can't use flex+gap because of `<b>`, etc. */
+        > *:not(:last-child) {
+            margin-bottom: 1.5rem;
+        }
+    }
+    ul { 
+        list-style-type: disc; 
+        list-style-position: inside; 
+    }
+    ol { 
+        list-style-type: decimal; 
+        list-style-position: inside; 
+    }
+}
+</style>
+{% endblock %}

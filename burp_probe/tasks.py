@@ -1,11 +1,10 @@
 from flask import current_app
 from burp_probe import scheduler, db
+from burp_probe.constants import ScanStates
 from burp_probe.models import Scan
 from burp_probe.services.burp import BurpProApi
 import json
 import requests
-
-DEAD_STATES = ['failed', 'cancelled', 'succeeded']
 
 @scheduler.task('interval', id='scan_sync', seconds=30, misfire_grace_time=900)
 def scan_sync():
@@ -13,7 +12,7 @@ def scan_sync():
         current_app.logger.debug('[Scan Sync Task] Task running.')
         scans = Scan.query.all()
         for scan in scans:
-            if scan.status not in DEAD_STATES:
+            if scan.status not in ScanStates.DEAD:
                 current_app.logger.info(f"[Scan Sync Task] \"{scan.name}\" is alive. Synchronizing.")
                 burp = BurpProApi(
                     protocol=scan.node.protocol,
@@ -23,11 +22,11 @@ def scan_sync():
                 )
                 try:
                     payload = burp.get_scan_task(scan.task_id)
+                    # update the scan
+                    scan.result = json.dumps(payload)
+                    scan.status = payload.get('scan_status')
                 except requests.exceptions.RequestException as e:
+                    scan.status = ScanStates.UNREACHABLE
                     current_app.logger.error(f"[Scan Sync Task] \"{scan.name}\" synchronization failed.")
-                    raise
-                # update the scan
-                scan.result = json.dumps(payload)
-                scan.status = payload.get('scan_status')
                 db.session.commit()
         current_app.logger.debug('[Scan Sync Task] Scans synchronized.')

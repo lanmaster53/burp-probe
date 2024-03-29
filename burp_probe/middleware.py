@@ -6,8 +6,8 @@ from burp_probe.models import User
 
 def load_user():
     g.user = None
-    if session.get('user_id'):
-        g.user = User.query.get(session.get('user_id'))
+    if user_id := session.get('user_id'):
+        g.user = User.query.get(user_id)
 
 # response middleware
 

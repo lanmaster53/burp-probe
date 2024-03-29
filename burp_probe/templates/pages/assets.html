@@ -1,14 +1,15 @@
 {% extends "shared/layout.html" %}
 {% block body %}
 <div class="flex items-center">
-    <div class="flex-1"><h1 class="text-xl font-semibold px-2 py-4">Assets</h1></div>
+    <div class="flex-1"><h1 class="text-2xl font-medium px-2 py-4">Assets</h1></div>
     <div class="flex-none"></div>
 </div>
 <div
     class="overflow-x-auto"
-    id="assets"
     hx-get="{{ url_for('core.assets_table') }}"
-    hx-trigger="load, watch-refresh-assets from:body"
+    hx-trigger="every 30s, watch-refresh-assets from:body"
     hx-swap="innerHTML"
-></div>
+>
+{{ render_partial('partials/tables/assets.html', assets=assets) }}
+</div>
 {% endblock %}

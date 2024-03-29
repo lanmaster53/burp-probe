@@ -1,6 +1,7 @@
 from burp_probe import db, bcrypt
+from burp_probe.constants import ScanStates
 from burp_probe.services.burp import BurpProApi
-from burp_probe.utilities import get_guid, get_current_utc_time, get_local_from_utc
+from burp_probe.utilities import get_guid, get_current_utc_time, get_local_from_utc, BurpScanParser
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 import binascii
 import json
@@ -15,10 +16,6 @@ class BaseModel(db.Model):
 
     def attr_is_nullable(self, s):
         return self.__table__.columns[s].nullable
-
-    @property
-    def created_as_string(self):
-        return get_local_from_utc(self.created).strftime("%Y-%m-%d %H:%M:%S")
 
 
 class User(BaseModel):
@@ -55,15 +52,41 @@ class Scan(BaseModel):
     node: Mapped['Node'] = relationship('Node', back_populates='scans', foreign_keys=[node_id])
 
     @property
+    def config_as_json(self):
+        return json.loads(self.configuration) if self.configuration else {}
+
+    @property
     def result_as_json(self):
-        return json.loads(self.result)
+        return json.loads(self.result) if self.result else {}
+
+    @property
+    def is_dead(self):
+        return self.status in ScanStates.DEAD
+
+    @property
+    def is_finished(self):
+        return self.status in ScanStates.FINISHED
+
+    @property
+    def is_error(self):
+        return self.status in ScanStates.ERROR
+
+    @property
+    def is_active(self):
+        return self.status in ScanStates.ACTIVE
+
+    @property
+    def parsed(self):
+        return BurpScanParser(self)
+
+    def get_issue_by_id(self, issue_id):
+        return next((i for i in self.parsed.result['issue_events'] if i['id'] == issue_id), None)
 
     @staticmethod
     def get_assets():
         assets = []
         for scan in Scan.query.all():
-            scan_config = json.loads(scan.configuration)
-            for url in scan_config['urls']:
+            for url in scan.parsed.config['urls']:
                 asset = next((a for a in assets if a['url'] == url), None)
                 if asset:
                     asset['count'] += 1
