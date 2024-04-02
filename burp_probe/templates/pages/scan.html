@@ -23,6 +23,8 @@
     hx-get="{{ url_for('core.issues_table', scan_id=scan.id) }}"
     hx-trigger="every 30s"
     hx-swap="innerHTML"
+    hx-on:htmx:before-swap="storeTableState();"
+    hx-on:htmx:after-swap="restoreTableState();"
 >
 {{ render_partial('partials/tables/issues.html', scan=scan) }}
 </div>
@@ -39,4 +41,49 @@
         </div>
     </div>
 </dialog>
+<style>
+/* Table arrow animation */
+.bp-arrow-closed {
+    transform: rotate(0deg);
+    transition: all 0.5s;
+}
+.bp-arrow-opened {
+    transform: rotate(90deg);
+    /*transition: all 0.5s;*/
+}
+/* Table rows initial accordion state */
+.bp-collapsed {
+    visibility: collapse;
+}
+.bp-visible {
+    visibility: visible;
+}
+</style>
+<script>
+state = {"type_ids": []};
+
+function toggleCollapse(type_id) {
+    document.querySelectorAll(`svg[data-type="${type_id}"]`).forEach((element) => {
+        //element.classList.toggle("bp-arrow-closed");
+        element.classList.toggle("bp-arrow-opened");
+    });
+    document.querySelectorAll(`tr[data-type="${type_id}"]`).forEach((element) => {
+        element.classList.toggle("bp-collapsed");
+        //element.classList.toggle("bp-visible");
+    });
+}
+
+function storeTableState() {
+    document.querySelectorAll("svg.bp-arrow-opened").forEach((element) => {
+        state.type_ids.push(element.dataset.type);
+    });
+}
+
+function restoreTableState() {
+    state.type_ids.forEach((type_id) => {
+        toggleCollapse(type_id);
+    });
+    state.type_ids = [];
+}
+</script>
 {% endblock %}
