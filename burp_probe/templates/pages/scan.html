@@ -23,10 +23,9 @@
     hx-get="{{ url_for('core.issues_table', scan_id=scan.id) }}"
     hx-trigger="every 30s"
     hx-swap="innerHTML"
-    hx-on:htmx:before-swap="storeTableState();"
-    hx-on:htmx:after-swap="restoreTableState();"
+    hx-vals='js:{type_ids: getExpandedTypeIds()}'
 >
-{{ render_partial('partials/tables/issues.html', scan=scan) }}
+{{ render_partial('partials/tables/issues.html', scan=scan, type_ids=[]) }}
 </div>
 <dialog id="showConfigModal" class="modal">
     <div class="modal-box">
@@ -49,41 +48,26 @@
 }
 .bp-arrow-opened {
     transform: rotate(90deg);
-    /*transition: all 0.5s;*/
 }
 /* Table rows initial accordion state */
 .bp-collapsed {
     visibility: collapse;
 }
-.bp-visible {
-    visibility: visible;
-}
 </style>
 <script>
-state = {"type_ids": []};
-
 function toggleCollapse(type_id) {
     document.querySelectorAll(`svg[data-type="${type_id}"]`).forEach((element) => {
-        //element.classList.toggle("bp-arrow-closed");
         element.classList.toggle("bp-arrow-opened");
     });
     document.querySelectorAll(`tr[data-type="${type_id}"]`).forEach((element) => {
         element.classList.toggle("bp-collapsed");
-        //element.classList.toggle("bp-visible");
     });
 }
 
-function storeTableState() {
-    document.querySelectorAll("svg.bp-arrow-opened").forEach((element) => {
-        state.type_ids.push(element.dataset.type);
-    });
-}
-
-function restoreTableState() {
-    state.type_ids.forEach((type_id) => {
-        toggleCollapse(type_id);
-    });
-    state.type_ids = [];
+function getExpandedTypeIds() {
+    return [...document.querySelectorAll("svg.bp-arrow-opened")].map((element) => {
+        return element.dataset.type;
+    }).join(",");
 }
 </script>
 {% endblock %}
