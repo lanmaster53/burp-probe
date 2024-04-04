@@ -110,14 +110,8 @@ class Node(BaseModel):
     protocol: Mapped[str] = mapped_column(db.String(), nullable=False)
     hostname: Mapped[str] = mapped_column(db.String(), nullable=False)
     port: Mapped[str] = mapped_column(db.String(), nullable=False)
-    api_key: Mapped[str] = mapped_column(db.String(), nullable=True)
+    api_key: Mapped[str] = mapped_column(db.String(), nullable=False)
     scans: Mapped[list['Scan']] = relationship('Scan', back_populates='node', foreign_keys='Scan.node_id', lazy='dynamic')
-
-    @property
-    def has_key(self):
-        if self.api_key:
-            return True
-        return False
 
     @property
     def url(self):
@@ -141,7 +135,7 @@ class Node(BaseModel):
 
     @property
     def active_scans(self):
-        return [s for s in self.scans if s.status not in ['succeeded']]
+        return [s for s in self.scans if s.is_active]
 
     @staticmethod
     def get_live_nodes():
