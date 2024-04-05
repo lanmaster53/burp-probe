@@ -5,3 +5,5 @@ Flask-APScheduler
 python-dotenv
 requests
 humanize
+marshmallow
+gunicorn

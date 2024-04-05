@@ -5,8 +5,8 @@
     <div class="flex-none">
         <button
             class="btn btn-circle btn-ghost"
-            hx-get="{{ url_for('core.nodes_modal') }}"
-            hx-target="#addNodeModal"
+            hx-get="{{ url_for('core.nodes_form') }}"
+            hx-target="#form_container"
         >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -22,9 +22,16 @@
 >
 {{ render_partial('partials/tables/nodes.html', nodes=nodes) }}
 </div>
-<dialog
-    id="addNodeModal"
-    class="modal"
-    hx-on:htmx:after-swap="this.showModal();"
-></dialog>
+<dialog id="modal" class="modal">
+    <div class="modal-box">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+        <div
+            id="form_container"
+            hx-on:htmx:before-swap="if(event.detail.xhr.status==201){modal.close();}"
+            hx-on:htmx:after-swap="modal.showModal()"
+        ></div>
+    </div>
+</dialog>
 {% endblock %}

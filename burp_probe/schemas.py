@@ -1,6 +1,55 @@
-from marshmallow import Schema, fields
+from burp_probe.models import Node, Scan
+from marshmallow import Schema, fields, pre_load, validate, validates, ValidationError
 
-# scan configuration schema
+# region form validation schemas
+
+
+class NodeFormSchema(Schema):
+    name = fields.Str(required=True)
+    description = fields.Str()
+    protocol = fields.Str(required=True, validate=validate.Regexp(r'[Hh][Tt][Tt][Pp][Ss]?') )
+    hostname = fields.Str(required=True, validate=validate.Regexp(r'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)+([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])$'))
+    port = fields.Str(required=True, validate=validate.Regexp(r'\d+'))
+    api_key = fields.Str(required=True, validate=validate.Regexp(r'^[a-zA-Z0-9]{32}$'))
+
+    @validates('name')
+    def is_unique(self, value):
+        if Node.query.filter_by(name=value).first():
+            raise ValidationError('Field must contain a unique value.')
+
+
+class ScanFormSchema(Schema):
+    name = fields.Str(required=True)
+    description = fields.Str()
+    credentials = fields.Str(validate=validate.Regexp(r'[^:]:[^:]'))
+    configurations = fields.Str()
+    targets = fields.Str(required=True)
+    scope_includes = fields.Str(required=True)
+    scope_excludes = fields.Str()
+    node = fields.Str(required=True)
+
+    @validates('name')
+    def name_is_unique(self, value):
+        if Scan.query.filter_by(name=value).first():
+            raise ValidationError('Field must contain a unique value.')
+
+    @validates('node')
+    def node_is_valid(self, value):
+        if not Node.query.get(value):
+            raise ValidationError('Field must contain a valid node ID.')
+
+    @validates('node')
+    def node_is_alive(self, value):
+        if not Node.query.get(value).is_alive:
+            raise ValidationError('Field must contain an available node.')
+
+
+node_form_schema = NodeFormSchema()
+scan_form_schema = ScanFormSchema()
+
+# endregion
+
+# region scan configuration schema
 
 
 class ScanConfigurationSchema(Schema):
@@ -36,7 +85,9 @@ class ConfigSchema(Schema):
     scan_callback = fields.Nested(ScanCallbackSchema, required=True)
 
 
-# scan result schema
+# endregion
+
+# region scan result schema
 
 
 class ScanMetricsSchema(Schema):
@@ -63,3 +114,6 @@ class ScanSchema(Schema):
     scan_status = fields.Str()
     message = fields.Str()
     error_code = fields.Integer()
+
+
+# endregion

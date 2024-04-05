@@ -2,6 +2,10 @@ import json
 import requests
 
 
+class BurpServiceException(Exception):
+    pass
+
+
 class BurpProApi:
 
     def __init__(self, protocol='http', hostname='127.0.0.1', port=1337, api_key=None, version='0.1'):
@@ -33,10 +37,10 @@ class BurpProApi:
         except requests.exceptions.HTTPError as e:
             payload = e.response.json()
             self._log(f"{payload.get('type', 'HTTPError')}: {payload['error']}")
-            raise
+            raise BurpServiceException(payload['error']) from e
         except requests.exceptions.RequestException as e:
             self._log(f"Error: {e}")
-            raise
+            raise BurpServiceException(str(e)) from e
 
     def post_scan_config(self, payload):
         response = self._call_api('/scan', 'POST', payload)

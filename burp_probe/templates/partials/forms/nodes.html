@@ -1,0 +1,102 @@
+<form
+    class="flex flex-col p-2"
+    hx-post="{{ url_for('core.nodes_create') }}"
+    hx-swap="outerHTML"
+>
+    <div class="label">
+        <span class="label-text">Name *</span>
+        {% if 'name' in errors %}
+        <span class="ml-4 text-xs text-red-500">{{ errors['name']|first }}</span>
+        {% endif %}
+    </div>
+    <input 
+        name="name"
+        type="text"
+        placeholder="Enter a unique name."
+        class="input input-bordered"
+        {% if 'name' in form %}
+        value="{{ form.name }}"
+        {% endif %}
+    />
+    <div class="label">
+        <span class="label-text">Description</span>
+        {% if 'description' in errors %}
+        <span class="ml-4 text-xs text-red-500">{{ errors['description']|first }}</span>
+        {% endif %}
+    </div>
+    <input 
+        name="description"
+        type="text"
+        placeholder="Enter a brief description."
+        class="input input-bordered"
+        {% if 'description' in form %}
+        value="{{ form.description }}"
+        {% endif %}
+    />
+    <div class="label">
+        <span class="label-text">Protocol *</span>
+        {% if 'protocol' in errors %}
+        <span class="ml-4 text-xs text-red-500">{{ errors['protocol']|first }}</span>
+        {% endif %}
+    </div>
+    <input 
+        name="protocol"
+        type="text"
+        placeholder="Enter a protocol, i.e. http or https."
+        class="input input-bordered"
+        {% if 'protocol' in form %}
+        value="{{ form.protocol }}"
+        {% endif %}
+    />
+    <div class="label">
+        <span class="label-text">Hostname/IP *</span>
+        {% if 'hostname' in errors %}
+        <span class="ml-4 text-xs text-red-500">{{ errors['hostname']|first }}</span>
+        {% endif %}
+    </div>
+    <input 
+        name="hostname"
+        type="text"
+        placeholder="Enter a hostname or IP address."
+        class="input input-bordered"
+        {% if 'hostname' in form %}
+        value="{{ form.hostname }}"
+        {% endif %}
+    />
+    <div class="label">
+        <span class="label-text">Port *</span>
+        {% if 'port' in errors %}
+        <span class="ml-4 text-xs text-red-500">{{ errors['port']|first }}</span>
+        {% endif %}
+    </div>
+    <input 
+        name="port"
+        type="text"
+        placeholder="Enter a port number."
+        class="input input-bordered"
+        {% if 'port' in form %}
+        value="{{ form.port }}"
+        {% endif %}
+    />
+    <div class="label">
+        <span class="label-text">API Key *</span>
+        {% if 'api_key' in errors %}
+        <span class="ml-4 text-xs text-red-500">{{ errors['api_key']|first }}</span>
+        {% endif %}
+    </div>
+    <input 
+        name="api_key"
+        type="text"
+        placeholder="Enter a Burp Pro API key."
+        class="input input-bordered"
+        {% if 'api_key' in form %}
+        value="{{ form.api_key }}"
+        {% endif %}
+    />
+    <div class="flex flex-row-reverse justify-between mt-9">
+        <button id="save" class="btn">Save</button>
+        {% if '_other' in errors %}
+        <div class="mt-4 ml-4 text-xs text-red-500">{{ errors['_other']|first }}</div>
+        {% endif %}
+    </div>
+</form>

@@ -241,7 +241,7 @@ def burp_scan_builder(callback_url, credentials, configurations, scope_includes,
     if credentials:
         scan_config['application_logins'] = []
         for credential in credentials.split('\n'):
-            username, password = [w.strip() for w in credential.split(':')]
+            username, password = [w.strip() for w in credential.split(':', 1)]
             c = {
                 'password': password,
                 'type': 'UsernameAndPasswordLogin',

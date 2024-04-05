@@ -9,6 +9,14 @@ def load_user():
     if user_id := session.get('user_id'):
         g.user = User.query.get(user_id)
 
+def strip_empty_params():
+    if obj := request.form:
+        data = dict(obj)
+        for field in list(data):
+            if data[field] == '':
+                data.pop(field)
+        request.form = data
+
 # response middleware
 
 def modify_response(response):

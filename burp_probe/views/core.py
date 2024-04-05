@@ -3,10 +3,11 @@ from burp_probe import db
 from burp_probe.constants import ScanStates
 from burp_probe.decorators import hx_trigger
 from burp_probe.helpers import render_partial
-from burp_probe.middleware import load_user, modify_response
+from burp_probe.middleware import load_user, strip_empty_params, modify_response
 from burp_probe.models import Node, Scan
-from burp_probe.services.burp import BurpProApi
+from burp_probe.services.burp import BurpProApi, BurpServiceException
 from burp_probe.utilities import burp_scan_builder, BurpIssueParser
+from burp_probe.schemas import node_form_schema, scan_form_schema
 import json
 import requests
 import traceback
@@ -16,6 +17,7 @@ blp = Blueprint('core', __name__)
 @blp.before_app_request
 def call_request_middleware():
     load_user()
+    strip_empty_params()
 
 @blp.after_app_request
 def call_response_middleware(response):
@@ -69,24 +71,33 @@ def nodes_table():
         nodes=Node.query.all(),
     )
 
-@blp.route('/nodes/modal')
+@blp.route('/nodes/form')
 #@login_required
-def nodes_modal():
+def nodes_form():
     return render_partial(
-        'partials/modals/nodes.html',
+        'partials/forms/nodes.html',
+        errors={},
+        form={},
     )
 
 @blp.route('/nodes', methods=['POST'])
 #@login_required
 @hx_trigger('watch-refresh-nodes')
 def nodes_create():
+    errors = node_form_schema.validate(request.form)
+    if errors:
+        return render_partial(
+            'partials/forms/nodes.html',
+            errors=errors,
+            form=request.form,
+        ), 400
     node = Node(
-        name=request.form.get('name') or None,
-        description=request.form.get('description') or None,
-        protocol=request.form.get('protocol') or None,
-        hostname=request.form.get('hostname') or None,
-        port=request.form.get('port') or None,
-        api_key=request.form.get('api_key') or None,
+        name=request.form.get('name'),
+        description=request.form.get('description'),
+        protocol=request.form.get('protocol'),
+        hostname=request.form.get('hostname'),
+        port=request.form.get('port'),
+        api_key=request.form.get('api_key'),
     )
     db.session.add(node)
     db.session.commit()
@@ -135,31 +146,37 @@ def scans_table():
         scans=Scan.query.all(),
     )
 
-@blp.route('/scans/modal')
+@blp.route('/scans/form')
 #@login_required
-def scans_modal():
+def scans_form():
     return render_partial(
-        'partials/modals/scans.html',
+        'partials/forms/scans.html',
         nodes=Node.get_live_nodes(),
+        errors={},
+        form={},
     )
 
 @blp.route('/scans', methods=['POST'])
 #@login_required
 @hx_trigger('watch-refresh-scans')
 def scans_create():
-    name = request.form.get('name' or None)
-    description = request.form.get('description' or None)
-    credentials = request.form.get('credentials' or None)
-    configurations = request.form.get('configurations' or None)
-    scope_includes = request.form.get('scope_includes' or None)
-    scope_excludes = request.form.get('scope_excludes' or None)
-    target_urls = request.form.get('targets' or None)
-    node_id = request.form.get('node' or None)
-    # resolve node ID
-    if not (node := Node.query.get(node_id)):
-        abort(400, description='Invalid node ID.')
-    if not node.is_alive:
-        abort(404, description='Node is not available.')
+    errors = scan_form_schema.validate(request.form)
+    if errors:
+        return render_partial(
+            'partials/forms/scans.html',
+            nodes=Node.get_live_nodes(),
+            errors=errors,
+            form=request.form,
+        ), 400
+    name = request.form.get('name')
+    description = request.form.get('description')
+    credentials = request.form.get('credentials')
+    configurations = request.form.get('configurations')
+    scope_includes = request.form.get('scope_includes')
+    scope_excludes = request.form.get('scope_excludes')
+    target_urls = request.form.get('targets')
+    node_id = request.form.get('node')
+    node = Node.query.get(node_id)
     # build and run the scan
     scan = Scan(
         name=name,
@@ -180,8 +197,13 @@ def scans_create():
     )
     try:
         response = burp.post_scan_config(scan_config)
-    except requests.exceptions.RequestException as e:
-        abort(500, description='Scan initialization failed.')
+    except BurpServiceException as e:
+        return render_partial(
+            'partials/forms/scans.html',
+            nodes=Node.get_live_nodes(),
+            errors={'_other': [str(e)]},
+            form=request.form,
+        ), 400
     scan.configuration = json.dumps(scan_config)
     scan.status = ScanStates.STARTED
     scan.task_id = response['task_id']
