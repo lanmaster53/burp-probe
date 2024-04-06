@@ -2,7 +2,7 @@ from flask import current_app
 from burp_probe import scheduler, db
 from burp_probe.constants import ScanStates
 from burp_probe.models import Scan
-from burp_probe.services.burp import BurpProApi
+from burp_probe.services.burp import BurpProApi, BurpServiceException
 import json
 import requests
 
@@ -25,7 +25,7 @@ def scan_sync():
                     # update the scan
                     scan.result = json.dumps(payload)
                     scan.status = payload.get('scan_status')
-                except requests.exceptions.RequestException as e:
+                except BurpServiceException as e:
                     scan.status = ScanStates.UNREACHABLE
                     current_app.logger.error(f"[Scan Sync Task] \"{scan.name}\" synchronization failed.")
                 db.session.commit()
