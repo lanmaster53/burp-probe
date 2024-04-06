@@ -7,7 +7,7 @@ from burp_probe.middleware import load_user, strip_empty_params, modify_response
 from burp_probe.models import Node, Scan
 from burp_probe.services.burp import BurpProApi, BurpServiceException
 from burp_probe.utilities import burp_scan_builder, BurpIssueParser
-from burp_probe.schemas import node_form_schema, scan_form_schema
+from burp_probe.schemas import node_form_create_schema, node_form_update_schema, scan_form_schema
 import json
 import requests
 import traceback
@@ -74,17 +74,21 @@ def nodes_table():
 @blp.route('/nodes/form')
 #@login_required
 def nodes_form():
+    form = {}
+    if node_id := request.args.get('node_id'):
+        if node := Node.query.get(node_id):
+            form = node.serialize()
     return render_partial(
         'partials/forms/nodes.html',
         errors={},
-        form={},
+        form=form,
     )
 
 @blp.route('/nodes', methods=['POST'])
 #@login_required
 @hx_trigger('watch-refresh-nodes')
 def nodes_create():
-    errors = node_form_schema.validate(request.form)
+    errors = node_form_create_schema.validate(request.form)
     if errors:
         return render_partial(
             'partials/forms/nodes.html',
@@ -102,6 +106,29 @@ def nodes_create():
     db.session.add(node)
     db.session.commit()
     flash('Node created.', 'success')
+    return '', 201
+
+@blp.route('/nodes/<string:node_id>', methods=['PATCH'])
+#@login_required
+@hx_trigger('watch-refresh-nodes')
+def nodes_update(node_id):
+    request.form['id'] = node_id
+    errors = node_form_update_schema.validate(request.form)
+    if errors:
+        return render_partial(
+            'partials/forms/nodes.html',
+            errors=errors,
+            form=request.form,
+        ), 400
+    node = Node.query.get(node_id)
+    node.name=request.form.get('name')
+    node.description=request.form.get('description')
+    node.protocol=request.form.get('protocol')
+    node.hostname=request.form.get('hostname')
+    node.port=request.form.get('port')
+    node.api_key=request.form.get('api_key')
+    db.session.commit()
+    flash('Node updated.', 'success')
     return '', 201
 
 @blp.route('/nodes/<string:node_id>', methods=['DELETE'])

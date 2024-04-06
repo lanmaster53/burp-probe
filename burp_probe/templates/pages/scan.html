@@ -23,7 +23,7 @@
     hx-get="{{ url_for('core.issues_table', scan_id=scan.id) }}"
     hx-trigger="every 30s"
     hx-swap="innerHTML"
-    hx-vals='js:{type_ids: getExpandedTypeIds()}'
+    hx-vals='js:{"type_ids": getExpandedTypeIds()}'
 >
 {{ render_partial('partials/tables/issues.html', scan=scan, type_ids=[]) }}
 </div>

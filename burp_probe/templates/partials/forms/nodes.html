@@ -1,6 +1,10 @@
 <form
     class="flex flex-col p-2"
+    {% if 'id' in form %}
+    hx-patch="{{ url_for('core.nodes_update', node_id=form.id) }}"
+    {% else %}
     hx-post="{{ url_for('core.nodes_create') }}"
+    {% endif %}
     hx-swap="outerHTML"
 >
     <div class="label">

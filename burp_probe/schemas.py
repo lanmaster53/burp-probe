@@ -1,5 +1,5 @@
 from burp_probe.models import Node, Scan
-from marshmallow import Schema, fields, pre_load, validate, validates, ValidationError
+from marshmallow import Schema, fields, pre_load, validate, validates, validates_schema, ValidationError
 
 # region form validation schemas
 
@@ -7,15 +7,28 @@ from marshmallow import Schema, fields, pre_load, validate, validates, Validatio
 class NodeFormSchema(Schema):
     name = fields.Str(required=True)
     description = fields.Str()
-    protocol = fields.Str(required=True, validate=validate.Regexp(r'[Hh][Tt][Tt][Pp][Ss]?') )
+    protocol = fields.Str(required=True, validate=validate.Regexp(r'^[Hh][Tt][Tt][Pp][Ss]?$') )
     hostname = fields.Str(required=True, validate=validate.Regexp(r'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)+([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])$'))
-    port = fields.Str(required=True, validate=validate.Regexp(r'\d+'))
+    port = fields.Str(required=True, validate=validate.Regexp(r'^\d+$'))
     api_key = fields.Str(required=True, validate=validate.Regexp(r'^[a-zA-Z0-9]{32}$'))
 
+
+class NodeFormCreateSchema(NodeFormSchema):
+
     @validates('name')
-    def is_unique(self, value):
+    def name_is_unique(self, value):
         if Node.query.filter_by(name=value).first():
             raise ValidationError('Field must contain a unique value.')
+
+
+class NodeFormUpdateSchema(NodeFormSchema):
+    id = fields.Str(required=True)
+
+    @validates_schema
+    def name_is_unique(self, data, **kwargs):
+        node = Node.query.filter_by(name=data.get('name')).first()
+        if node and node.id != data.get('id'):
+            raise ValidationError('Field must contain a unique value.', field_name='name')
 
 
 class ScanFormSchema(Schema):
@@ -44,7 +57,8 @@ class ScanFormSchema(Schema):
             raise ValidationError('Field must contain an available node.')
 
 
-node_form_schema = NodeFormSchema()
+node_form_create_schema = NodeFormCreateSchema()
+node_form_update_schema = NodeFormUpdateSchema()
 scan_form_schema = ScanFormSchema()
 
 # endregion

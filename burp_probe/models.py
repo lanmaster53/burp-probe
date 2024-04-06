@@ -137,6 +137,17 @@ class Node(BaseModel):
     def active_scans(self):
         return [s for s in self.scans if s.is_active]
 
+    def serialize(self):
+        return dict(
+            id=self.id,
+            name=self.name,
+            description=self.description,
+            protocol=self.protocol,
+            hostname=self.hostname,
+            port=self.port,
+            api_key=self.api_key,
+        )
+
     @staticmethod
     def get_live_nodes():
         live_nodes = []
