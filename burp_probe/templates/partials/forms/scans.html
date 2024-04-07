@@ -1,112 +1,128 @@
 <form
-    class="flex flex-col p-2"
+    class="flex flex-col space-y-4"
     hx-post="{{ url_for('core.scans_create') }}"
     hx-swap="outerHTML"
 >
-    <div class="label">
-        <span class="label-text">Name *</span>
-        {% if 'name' in errors %}
-        <span class="ml-4 text-xs text-red-500">{{ errors['name']|first }}</span>
-        {% endif %}
-    </div>
-    <input
-        name="name"
-        type="text"
-        placeholder="Enter a unique name."
-        class="input input-bordered"
-        {% if 'name' in form %}
-        value="{{ form.name }}"
-        {% endif %}
-    />
-    <div class="label">
-        <span class="label-text">Description</span>
-        {% if 'description' in errors %}
-        <span class="ml-4 text-xs text-red-500">{{ errors['description']|first }}</span>
-        {% endif %}
-    </div>
-    <input
-        name="description"
-        type="text"
-        placeholder="Enter a brief description."
-        class="input input-bordered"
-        {% if 'description' in form %}
-        value="{{ form.description }}"
-        {% endif %}
-    />
-    <div class="label">
-        <span class="label-text">Credentials</span>
-        {% if 'credentials' in errors %}
-        <span class="ml-4 text-xs text-red-500">{{ errors['credentials']|first }}</span>
-        {% endif %}
-    </div>
-    <textarea
-        name="credentials"
-        placeholder="Enter a list of credentials. i.e. root:123456"
-        class="textarea textarea-bordered"
-    >{% if 'credentials' in form %}{{ form.credentials }}{% endif %}</textarea>
-    <div class="label">
-        <span class="label-text">Configurations</span>
-        {% if 'configurations' in errors %}
-        <span class="ml-4 text-xs text-red-500">{{ errors['configurations']|first }}</span>
-        {% endif %}
-    </div>
-    <textarea
-        name="configurations"
-        placeholder="Enter a list of configuration names."
-        class="textarea textarea-bordered"
-    >{% if 'configurations' in form %}{{ form.configurations }}{% endif %}</textarea>
-    <div class="label">
-        <span class="label-text">Target URLs *</span>
-        {% if 'targets' in errors %}
-        <span class="ml-4 text-xs text-red-500">{{ errors['targets']|first }}</span>
-        {% endif %}
-    </div>
-    <textarea
-        name="targets"
-        placeholder="Enter a list of target URLs."
-        class="textarea textarea-bordered"
-    >{% if 'targets' in form %}{{ form.targets }}{% endif %}</textarea>
-    <div class="label">
-        <span class="label-text">Scope Inclusions *</span>
-        {% if 'scope_includes' in errors %}
-        <span class="ml-4 text-xs text-red-500">{{ errors['scope_includes']|first }}</span>
-        {% endif %}
-    </div>
-    <textarea
-        name="scope_includes"
-        placeholder="Enter a list of URLs to include in scope."
-        class="textarea textarea-bordered"
-    >{% if 'scope_includes' in form %}{{ form.scope_includes }}{% endif %}</textarea>
-    <div class="label">
-        <span class="label-text">Scope Exclusions</span>
-        {% if 'scope_excludes' in errors %}
-        <span class="ml-4 text-xs text-red-500">{{ errors['scope_excludes']|first }}</span>
-        {% endif %}
-    </div>
-    <textarea
-        name="scope_excludes"
-        placeholder="Enter a list of URLs to exclude from scope."
-        class="textarea textarea-bordered"
-    >{% if 'scope_excludes' in form %}{{ form.scope_excludes }}{% endif %}</textarea>
-    <div class="label">
-        <span class="label-text">Node *</span>
-        {% if 'node' in errors %}
-        <span class="ml-4 text-xs text-red-500">{{ errors['node']|first }}</span>
-        {% endif %}
-    </div>
-    <select
-        name="node"
-        class="select select-bordered"
-    >
-    {% for node in nodes %}
-        <option
-            value="{{ node.id }}"
-            {% if 'node' in form and form.node == node.id %}
-            selected
+    <div class="flex flex-col">
+        <div class="label">
+            <span class="label-text">Name *</span>
+            {% if 'name' in errors %}
+            <span class="ml-4 text-xs text-red-500">{{ errors['name']|first }}</span>
             {% endif %}
-        >{{ node.name }}</option>
-    {% endfor %}
-    </select>
+        </div>
+        <input
+            name="name"
+            type="text"
+            placeholder="My First Scan"
+            class="input input-bordered"
+            {% if 'name' in form %}
+            value="{{ form.name }}"
+            {% endif %}
+        />
+    </div>
+    <div class="flex flex-col">
+        <div class="label">
+            <span class="label-text">Description</span>
+            {% if 'description' in errors %}
+            <span class="ml-4 text-xs text-red-500">{{ errors['description']|first }}</span>
+            {% endif %}
+        </div>
+        <input
+            name="description"
+            type="text"
+            placeholder="The first scan I ever ran."
+            class="input input-bordered"
+            {% if 'description' in form %}
+            value="{{ form.description }}"
+            {% endif %}
+        />
+    </div>
+    <div class="flex flex-col">
+        <div class="label">
+            <span class="label-text">Credentials</span>
+            {% if 'credentials' in errors %}
+            <span class="ml-4 text-xs text-red-500">{{ errors['credentials']|first }}</span>
+            {% endif %}
+        </div>
+        <textarea
+            name="credentials"
+            placeholder="list of credentials i.e. root:123456"
+            class="textarea textarea-bordered"
+        >{% if 'credentials' in form %}{{ form.credentials }}{% endif %}</textarea>
+    </div>
+    <div class="flex flex-col">
+        <div class="label">
+            <span class="label-text">Configurations</span>
+            {% if 'configurations' in errors %}
+            <span class="ml-4 text-xs text-red-500">{{ errors['configurations']|first }}</span>
+            {% endif %}
+        </div>
+        <textarea
+            name="configurations"
+            placeholder="list of configuration names i.e. Audit coverage - thorough"
+            class="textarea textarea-bordered"
+        >{% if 'configurations' in form %}{{ form.configurations }}{% endif %}</textarea>
+    </div>
+    <div class="flex flex-col">
+        <div class="label">
+            <span class="label-text">Target URLs *</span>
+            {% if 'targets' in errors %}
+            <span class="ml-4 text-xs text-red-500">{{ errors['targets']|first }}</span>
+            {% endif %}
+        </div>
+        <textarea
+            name="targets"
+            placeholder="list of target URLs i.e. https://www.lanmaster53.com"
+            class="textarea textarea-bordered"
+        >{% if 'targets' in form %}{{ form.targets }}{% endif %}</textarea>
+    </div>
+    <div class="flex flex-col">
+        <div class="label">
+            <span class="label-text">Scope Inclusions *</span>
+            {% if 'scope_includes' in errors %}
+            <span class="ml-4 text-xs text-red-500">{{ errors['scope_includes']|first }}</span>
+            {% endif %}
+        </div>
+        <textarea
+            name="scope_includes"
+            placeholder="list of URLs to include in scope i.e. https://www.lanmaster53.com"
+            class="textarea textarea-bordered"
+        >{% if 'scope_includes' in form %}{{ form.scope_includes }}{% endif %}</textarea>
+    </div>
+    <div class="flex flex-col">
+        <div class="label">
+            <span class="label-text">Scope Exclusions</span>
+            {% if 'scope_excludes' in errors %}
+            <span class="ml-4 text-xs text-red-500">{{ errors['scope_excludes']|first }}</span>
+            {% endif %}
+        </div>
+        <textarea
+            name="scope_excludes"
+            placeholder="list of URLs to exclude from scope i.e. https://www.lanmaster53.com/do-not-scan"
+            class="textarea textarea-bordered"
+        >{% if 'scope_excludes' in form %}{{ form.scope_excludes }}{% endif %}</textarea>
+    </div>
+    <div class="flex flex-col">
+        <div class="label">
+            <span class="label-text">Node *</span>
+            {% if 'node' in errors %}
+            <span class="ml-4 text-xs text-red-500">{{ errors['node']|first }}</span>
+            {% endif %}
+        </div>
+        <select
+            name="node"
+            class="select select-bordered"
+        >
+        {% for node in nodes %}
+            <option
+                value="{{ node.id }}"
+                {% if 'node' in form and form.node == node.id %}
+                selected
+                {% endif %}
+            >{{ node.name }}</option>
+        {% endfor %}
+        </select>
+    </div>
     <div class="flex flex-row-reverse justify-between mt-9">
         <button id="save" class="btn">Save</button>
         {% if '_other' in errors %}

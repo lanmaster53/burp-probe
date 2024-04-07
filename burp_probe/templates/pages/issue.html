@@ -1,8 +1,8 @@
-{% from "shared/macros.html" import accordion, severity_svg %}
-{% extends "shared/layout.html" %}
-{% block body %}
+{% from 'shared/macros.html' import accordion, severity_svg %}
+{% extends 'shared/page.html' %}
+{% block content %}
 <div class="flex items-center">
-    <div class="flex-1"><h1 class="text-2xl font-medium px-2 py-4">{{ issue_event.issue.name }}</h1></div>
+    <div class="flex-1 px-2 py-4"><h1 class="text-2xl font-medium">{{ issue_event.issue.name }}</h1></div>
     <div class="flex-none"></div>
 </div>
 <div class="my-4 p-4 flex flex-col md:flex-row justify-around rounded-lg bg-gray-100">
