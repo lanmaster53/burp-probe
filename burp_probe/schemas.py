@@ -4,6 +4,11 @@ from marshmallow import Schema, fields, pre_load, validate, validates, validates
 # region form validation schemas
 
 
+class LoginFormSchema(Schema):
+    email = fields.Str(required=True)
+    password = fields.Str(required=True)
+
+
 class NodeFormSchema(Schema):
     name = fields.Str(required=True)
     description = fields.Str()
@@ -57,6 +62,7 @@ class ScanFormSchema(Schema):
             raise ValidationError('Field must contain an available node.')
 
 
+login_form_schema = LoginFormSchema()
 node_form_create_schema = NodeFormCreateSchema()
 node_form_update_schema = NodeFormUpdateSchema()
 scan_form_schema = ScanFormSchema()

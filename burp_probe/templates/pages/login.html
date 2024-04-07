@@ -1,0 +1,70 @@
+{% extends 'shared/layout.html' %}
+{% block body %}
+<section>
+    <div class="flex flex-col items-center justify-center bg-base-200 px-6 py-8 mx-auto h-screen">
+        <div class="flex mb-6">
+            <div class="flex flex-col items-center justify-center">
+                <div class="mr-2 p-0.5" style="background-color: #00b5ef;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-24 h-24 -rotate-45">
+                        <g fill="none" stroke-width="1.5" stroke="white" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16.95 9.01c3.02.739 5.05 2.123 5.05 3.714C22 15.091 17.52 17 12 17S2 15.091 2 12.724C2 11.134 4.04 9.739 7.07 9"/>
+                            <path d="M7 9c0 1.105 2.239 2 5 2s5-.895 5-2v-.035C17 6.223 14.761 4 12 4S7 6.223 7 8.965V9m8 8l2 3m-8.5-3L7 20m5-6h.01M7 13h.01M17 13h.01"/>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+            <div class="flex flex-col tracking-tight">
+                <div class="text-6xl font-medium">Burp Probe</div>
+                <div class="text-3xl font-thin" style="color: #00b5ef;">Remote Scan Manager</div>
+            </div>
+        </div>
+        <div class="w-full bg-base-100 rounded-lg shadow-lg md:max-w-md">
+            <div class="p-8 space-y-6">
+                <h1 class="text-2xl font-medium">
+                    Sign in to your account
+                </h1>
+                <form
+                    class="flex flex-col space-y-4"
+                    action="{{ url_for('auth.login_submit') }}"
+                    method="post"
+                >
+                    <div class="flex flex-col">
+                        <div class="label">
+                            <span class="label-text">Email Address</span>
+                            {% if 'email' in errors %}
+                            <span class="ml-4 text-xs text-red-500">{{ errors['email']|first }}</span>
+                            {% endif %}
+                        </div>
+                        <input 
+                            name="email"
+                            type="text"
+                            placeholder="name@domain.com"
+                            class="input input-bordered"
+                        />
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="label">
+                            <span class="label-text">Password</span>
+                            {% if 'password' in errors %}
+                            <span class="ml-4 text-xs text-red-500">{{ errors['password']|first }}</span>
+                            {% endif %}
+                        </div>
+                        <input 
+                            name="password"
+                            type="text"
+                            placeholder="••••••••••"
+                            class="input input-bordered"
+                        />
+                    </div>
+                    <div class="flex flex-row-reverse justify-between mt-9">
+                        <button id="save" class="btn">Submit</button>
+                        {% if '_other' in errors %}
+                        <div class="mt-4 ml-4 text-xs text-red-500">{{ errors['_other']|first }}</div>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

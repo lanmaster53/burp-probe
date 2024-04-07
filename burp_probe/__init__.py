@@ -44,6 +44,8 @@ def create_app(config):
             data = json.loads(data)
         return json.dumps(data, indent=4)
 
+    from burp_probe.views.auth import blp as AuthBlueprint
+    app.register_blueprint(AuthBlueprint)
     from burp_probe.views.core import blp as CoreBlueprint
     app.register_blueprint(CoreBlueprint)
 
@@ -51,8 +53,24 @@ def create_app(config):
     def init_data():
         from burp_probe import models
         db.create_all()
-        # initialization logic here (optional)
         app.logger.info('Database initialized.')
+        from burp_probe.constants import UserTypes
+        import string
+        import secrets
+        characters = string.ascii_letters + string.digits
+        password = ''.join(secrets.choice(characters) for i in range(15))
+        user = models.User(
+            email='admin@burp-probe.com',
+            name='Admin User',
+            password=password,
+            type=UserTypes.ADMIN
+        )
+        db.session.add(user)
+        db.session.commit()
+        app.logger.info('Administrator user initialized.')
+        app.logger.info(f"Email: {user.email}")
+        app.logger.info(f"Password: {password}")
+        app.logger.info(f"{'*'*8} THIS INFORMATION WILL NOT BE SHOWN AGAIN! {'*'*8}")
 
     @app.cli.command('migrate')
     def migrate_data():

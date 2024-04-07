@@ -1,7 +1,7 @@
 from flask import Blueprint, current_app, request, redirect, url_for, flash, render_template, abort
 from burp_probe import db
 from burp_probe.constants import ScanStates
-from burp_probe.decorators import hx_trigger
+from burp_probe.decorators import hx_trigger, login_required
 from burp_probe.helpers import render_partial
 from burp_probe.middleware import load_user, strip_empty_params, modify_response
 from burp_probe.models import Node, Scan
@@ -9,7 +9,6 @@ from burp_probe.services.burp import BurpProApi, BurpServiceException
 from burp_probe.utilities import burp_scan_builder, BurpIssueParser
 from burp_probe.schemas import node_form_create_schema, node_form_update_schema, scan_form_schema
 import json
-import requests
 import traceback
 
 blp = Blueprint('core', __name__)
@@ -29,22 +28,22 @@ def index():
     return redirect(url_for('core.home'))
 
 @blp.route('/home')
-#@login_required
+@login_required
 def home():
     return redirect(url_for('core.scans'))
 
 # region assets
 
 @blp.route('/assets')
-#@login_required
+@login_required
 def assets():
     return render_template(
         'pages/assets.html',
         assets=Scan.get_assets(),
-)
+    )
 
 @blp.route('/assets/table')
-#@login_required
+@login_required
 def assets_table():
     return render_partial(
         'partials/tables/assets.html',
@@ -56,7 +55,7 @@ def assets_table():
 # region nodes
 
 @blp.route('/nodes')
-#@login_required
+@login_required
 def nodes():
     return render_template(
         'pages/nodes.html',
@@ -64,7 +63,7 @@ def nodes():
     )
 
 @blp.route('/nodes/table')
-#@login_required
+@login_required
 def nodes_table():
     return render_partial(
         'partials/tables/nodes.html',
@@ -72,7 +71,7 @@ def nodes_table():
     )
 
 @blp.route('/nodes/form')
-#@login_required
+@login_required
 def nodes_form():
     form = {}
     if node_id := request.args.get('node_id'):
@@ -85,7 +84,7 @@ def nodes_form():
     )
 
 @blp.route('/nodes', methods=['POST'])
-#@login_required
+@login_required
 @hx_trigger('watch-refresh-nodes')
 def nodes_create():
     errors = node_form_create_schema.validate(request.form)
@@ -109,7 +108,7 @@ def nodes_create():
     return '', 201
 
 @blp.route('/nodes/<string:node_id>', methods=['PATCH'])
-#@login_required
+@login_required
 @hx_trigger('watch-refresh-nodes')
 def nodes_update(node_id):
     request.form['id'] = node_id
@@ -132,7 +131,7 @@ def nodes_update(node_id):
     return '', 201
 
 @blp.route('/nodes/<string:node_id>', methods=['DELETE'])
-#@login_required
+@login_required
 @hx_trigger('watch-refresh-nodes')
 def nodes_delete(node_id):
     if not (node := Node.query.get(node_id)):
@@ -143,7 +142,7 @@ def nodes_delete(node_id):
     return '', 200
 
 @blp.route('/nodes/<string:node_id>/test')
-#@login_required
+@login_required
 @hx_trigger('watch-refresh-nodes')
 def nodes_test(node_id):
     node = Node.query.get(node_id)
@@ -158,7 +157,7 @@ def nodes_test(node_id):
 # region scans
 
 @blp.route('/scans')
-#@login_required
+@login_required
 def scans():
     return render_template(
         'pages/scans.html',
@@ -166,7 +165,7 @@ def scans():
     )
 
 @blp.route('/scans/table')
-#@login_required
+@login_required
 def scans_table():
     return render_partial(
         'partials/tables/scans.html',
@@ -174,7 +173,7 @@ def scans_table():
     )
 
 @blp.route('/scans/form')
-#@login_required
+@login_required
 def scans_form():
     return render_partial(
         'partials/forms/scans.html',
@@ -184,7 +183,7 @@ def scans_form():
     )
 
 @blp.route('/scans', methods=['POST'])
-#@login_required
+@login_required
 @hx_trigger('watch-refresh-scans')
 def scans_create():
     errors = scan_form_schema.validate(request.form)
@@ -243,7 +242,7 @@ def scans_create():
 # region scan
 
 @blp.route('/scans/<string:scan_id>')
-#@login_required
+@login_required
 def scan(scan_id):
     if not (scan := Scan.query.get(scan_id)):
         abort(404, description='Scan does not exist.')
@@ -253,7 +252,7 @@ def scan(scan_id):
     )
 
 @blp.route('/scans/<string:scan_id>/header')
-#@login_required
+@login_required
 def scan_header(scan_id):
     if not (scan := Scan.query.get(scan_id)):
         abort(404, description='Scan does not exist.')
@@ -263,7 +262,7 @@ def scan_header(scan_id):
     )
 
 @blp.route('/scans/<string:scan_id>', methods=['DELETE'])
-#@login_required
+@login_required
 @hx_trigger('watch-refresh-scans')
 def scans_delete(scan_id):
     if not (scan := Scan.query.get(scan_id)):
@@ -278,7 +277,7 @@ def scans_delete(scan_id):
 # region issues
 
 @blp.route('/scans/<string:scan_id>/issues/table')
-#@login_required
+@login_required
 def issues_table(scan_id):
     if not (scan := Scan.query.get(scan_id)):
         abort(404, description='Scan does not exist.')
@@ -294,7 +293,7 @@ def issues_table(scan_id):
 # region issue
 
 @blp.route('/scans/<string:scan_id>/issues/<string:issue_id>')
-#@login_required
+@login_required
 def issue(scan_id, issue_id):
     if not (scan := Scan.query.get(scan_id)):
         abort(404, description='Scan does not exist.')

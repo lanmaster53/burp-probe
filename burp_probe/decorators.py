@@ -7,8 +7,7 @@ def login_required(func):
     def wrapped(*args, **kwargs):
         if g.user:
             return func(*args, **kwargs)
-        abort(401)
-        #return redirect(url_for('reporting.login', next=request.url))
+        return redirect(url_for('auth.login'))
     return wrapped
 
 def roles_required(*roles):
