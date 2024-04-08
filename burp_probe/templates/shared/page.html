@@ -2,28 +2,11 @@
 {% block body %}
 <header class="shadow-lg bg-base-100 relative z-40" style="border-bottom: 3px solid #00b5ef;"><!-- relative prevents content from overlapping header shadow -->
     <nav class="navbar">
-        <!-- brand -->
-        <div class="flex-1 px-4 flex">
-            <div class="flex flex-col items-center justify-center">
-                <a href="{{ url_for('core.home') }}">
-                    <!-- logo -->
-                    <div class="mr-2 p-0.5" style="background-color: #00b5ef;">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-12 h-12 -rotate-45">
-                            <g fill="none" stroke-width="1.5" stroke="white" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M16.95 9.01c3.02.739 5.05 2.123 5.05 3.714C22 15.091 17.52 17 12 17S2 15.091 2 12.724C2 11.134 4.04 9.739 7.07 9"/>
-                                <path d="M7 9c0 1.105 2.239 2 5 2s5-.895 5-2v-.035C17 6.223 14.761 4 12 4S7 6.223 7 8.965V9m8 8l2 3m-8.5-3L7 20m5-6h.01M7 13h.01M17 13h.01"/>
-                            </g>
-                        </svg>
-                    </div>
-                    <!-- end logo -->
-                </a>
-            </div>
-            <div class="flex flex-col tracking-tight">
-                <div class="text-3xl font-medium">Burp Probe</div>
-                <div class="font-thin" style="color: #00b5ef;">Remote Scan Manager</div>
-            </div>
+        <div class="flex-1">
+            <a href="{{ url_for('core.home') }}">
+                <img class="max-h-12" src="{{ url_for('static', filename='images/logo.png') }}" />
+            </a>
         </div>
-        <!-- end brand -->
         <div class="flex-none">
             <div class="dropdown dropdown-end md:hidden">
                 <div tabindex="0" role="button" class="btn btn-ghost btn-circle">

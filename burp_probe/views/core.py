@@ -32,6 +32,12 @@ def index():
 def home():
     return redirect(url_for('core.scans'))
 
+@blp.route('/logo')
+def logo():
+    return render_template(
+        'pages/logo.html',
+    )
+
 # region assets
 
 @blp.route('/assets')
