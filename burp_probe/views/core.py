@@ -136,6 +136,8 @@ def nodes_update(node_id):
 def nodes_delete(node_id):
     if not (node := Node.query.get(node_id)):
         abort(404, description='Node does not exist.')
+    if node.scans:
+        abort(409, description='Node has associated scans')
     db.session.delete(node)
     db.session.commit()
     flash('Node deleted.', 'success')
