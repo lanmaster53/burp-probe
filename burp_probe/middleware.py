@@ -29,8 +29,10 @@ def manage_flashes(response):
     # the HX-Request header indicates that the request was made with HTMX
     if 'HX-Request' not in request.headers:
         return response
-    # ignore HTTP redirections because HTMX cannot read the body
+    # refactor HTTP redirections as client-side redirections
     if 300 <= response.status_code < 400:
+        response.headers['HX-Redirect'] = response.location
+        response.status_code = 204
         return response
     # ignore client-side redirection because HTMX drops OOB swaps
     if 'HX-Redirect' in response.headers:
