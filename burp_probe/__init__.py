@@ -1,9 +1,13 @@
 from flask import Flask
+from flask.logging import default_handler
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 from flask_apscheduler import APScheduler
 from burp_probe.helpers import render_partial
 import json
+import logging
+
+default_handler.setFormatter(logging.Formatter('[%(asctime)s] %(levelname)s from %(name)s in %(module)s: %(message)s'))
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()

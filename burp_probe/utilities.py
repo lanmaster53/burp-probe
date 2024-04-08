@@ -2,6 +2,7 @@ from datetime import datetime, timezone, timedelta
 import base64
 import html
 import humanize
+import logging
 import uuid
 
 def get_current_utc_time():
@@ -24,9 +25,6 @@ class BurpScanParser:
         self.scan = scan
         self.result = scan.result_as_json
         self.config = scan.config_as_json
-
-    def _log(self, s):
-        print(f"[Burp Scan Parser] {s}")
 
     @property
     def raw_start_time(self):
@@ -105,6 +103,7 @@ class BurpScanParser:
 class BurpIssueParser:
 
     def __init__(self, issue_event):
+        self.logger = logging.getLogger('burp_probe.burp_issue_parser')
         self.issue_event = issue_event
 
     @property
@@ -118,7 +117,7 @@ class BurpIssueParser:
         func = getattr(self, f"process_{evidence['type']}", None)
         if func:
             return func(evidence)
-        print(f"*************** Unidentified evidence type: {evidence['type']}")
+        self.logger.debug(f"Unidentified evidence type: {evidence['type']}")
         return []
 
     def process_FirstOrderEvidence(self, evidence):
@@ -222,7 +221,7 @@ class BurpIssueParser:
             elif segment['type'] == 'SnipSegment':
                 parsed_request += '\n\n**snipped**\n\n'
             else:
-                print(f"*************** Unidentified request segment type: {segment['type']}")
+                self.logger.debug(f"Unidentified request segment type: {segment['type']}")
         return parsed_request
 
     def codify(self, s):
