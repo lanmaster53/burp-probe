@@ -281,7 +281,7 @@ def scans_delete(scan_id):
 def issues_table(scan_id):
     if not (scan := Scan.query.get(scan_id)):
         abort(404, description='Scan does not exist.')
-    type_ids = [int(t) for t in request.args.get('type_ids', '').split(',')]
+    type_ids = [int(t) for t in request.args.get('type_ids', '').split(',') if t]
     return render_partial(
         'partials/tables/issues.html',
         scan=scan,
