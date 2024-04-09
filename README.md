@@ -1,26 +1,29 @@
-# Burp Probe
+<img src="https://github.com/lanmaster53/burp-probe/raw/main/burp_probe/static/images/logo.png" width=500 />
 
-Burp Probe, or **Burp P**ro **R**eplica **O**f **B**urp **E**nterprise, is a web appliction that leverages the Burp Suite Pro REST API to provide a centralized and managed platform for remotely conducting scans through a distributed network of Burp Suite Pro instances.
+Burp Probe, or **Burp P**ro **R**esemblance **O**f **B**urp **E**nterprise, is a web application that leverages the Burp Suite Pro REST API to provide a centralized and managed platform for remotely conducting scans through a distributed network of Burp Suite Pro instances.
 
-## Is it really a replica of Burp Suite Enterprise?
+Burp Suite Pro contains a minimal REST API that provides the ability to remotely launch Burp Scanner scans. Burp Probe uses this functionality to launch scans on registered Burp Suite Pro instances (nodes) that are deployed throughout a network environment. Burp Probe then tracks and monitors nodes and their associated scans, while providing users with the ability to review scan results in real-time.
 
-No. Not even close. Burp Probe is not intended to be a competing product, but rather a poor man's gateway drug to Burp Suite Enterprise. Burp Suite Enterprise has vastly more capability than Burp Probe. So much so that I won't even begin to try an explain it here. Instead, here's a link to the [Burp Suite Enterprise home page](https://portswigger.net/burp/enterprise). If you're looking for a complete enterprise-level solution, then you should definitely check out Burp Suite Enterprise.
+## Burp Probe vs. Burp Suite Enterprise
 
-## Then what exactly is Burp Probe?
+Burp Probe is not intended to be a competing product to Burp Suite Enterprise, but rather a poor man's gateway drug to the real deal. If you're looking for a complete enterprise-level solution, Burp Suite Enterprise has vastly more capability than Burp Probe. Below is a table showing a light comparison between Burp Probe and Burp Suite Enterprise that barely scratches the surface of what Burp Suite Enterprise can do. For a full list of features, check out PortSwigger's [Burp Suite Enterprise Features page](https://portswigger.net/burp/enterprise/features).
 
-Burp Suite Pro contains a minimal REST API that provides the ability to remotely launch Burp Scanner scans. Burp Probe uses this functionality to launch scans on registered Burp Suite Pro instances (nodes) that are deployed throughout a network environment. Burp Probe then tracks and monitors nodes and their associated scans, while providing users with the ablity to review scan results in real-time.
+| Feature | Probe | Enterprise |
+|---------|:-----:|:----------:|
+| Distributed dynamic scanning | :white_check_mark: | :white_check_mark: |
+| Scheduled scanning | :x: | :white_check_mark: |
+| Remote custom scan configuration | :x: | :white_check_mark: |
+| Remote node control | :x: | :white_check_mark: |
+| CI/CD pipeline integrations | :x: | :white_check_mark: |
+| Vulnerability management | :x: | :white_check_mark: |
+| Reporting | :x: | :white_check_mark: |
+| Open Source-ish | :white_check_mark: | :x: |
+| Complex authentication handling <sup>1</sup> | :white_check_mark: | :x: |
+| Free to use <sup>2</sup> | :white_check_mark: | :x: |
 
-## Sounds like Burp Suite Enterprise to me.
+<sup>1</sup> Burp Suite Pro can be manually configured to handle complex authentication systems that Burp Suite Enterprise nodes cannot, i.e. MFA, CAPTCHA, OIDC (some exceptions), etc. While this does require directly accessing the Burp Suite Pro node, it also makes scanning applications with complex authentication systems possible with Burp Probe. Scanning through these obstacles with Burp Suite Pro is a topic I cover in [Practical Burp Suite Pro: Advanced Tactics](https://www.practisec.com/training/pbat/).
 
-Well, it's not. The Burp Suite Pro REST API puts heavy restrictions on scan configurability and provides no remote control over the node itself. The Burp Suite Enterprise node REST API allows for both of these things, which opens up opportunities for a much richer feature set. Burp Probe requires administrators to manually interact the Burp Suite Pro nodes to achieve higher levels of functionality. In addition, Burp Suite Enterprise provides a host of other features that Burp Probe does not, such as CI/CD pipeline integrations, vulnerablity management, and reporting. See the link above for details.
-
-## Burp Probe Advantages
-
-While Burp Probe has nowhere near the capability of Burp Suite Enterprise, it does have some advantages.
-
-1. It's open source. The community has input into the tool with the ability to make it better and expand its feature set.
-1. Burp Suite Enterprise nodes don't have a UI or the full capability of Burp Suite Pro. A Burp Suite Pro node can be manually configured to handle complex authentication systems that Burp Suite Enterprise nodes cannot. While it does require directly accessing the Burp Suite Pro node, it also makes scanning applications with complex authentication systems possible with Burp Probe. Scanning through these obstracles with Burp Suite Pro is a topic that I cover in [Practical Burp Suite Pro: Advanced Tactics](https://www.practisec.com/training/pbat/).
-1. It's free. However, if you'd like to help fund the time I spend on this project, then I gladly accept donations via PayPal. Thank you!
+<sup>2</sup> Burp Probe is free to use privately and commercially (see [LICENSE.txt](https://github.com/lanmaster53/burp-probe/blob/main/LICENSE.txt) for more details). However, if you'd like to help fund the time I spend on this project, then I gladly accept donations via PayPal. Thank you!
 
 [![](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=tjt1980@gmail.com&item_name=Donation+for+Burp+Probe)
 
@@ -58,6 +61,19 @@ While Burp Probe has nowhere near the capability of Burp Suite Enterprise, it do
         * This is where the SQLite database will be stored.
     * `burp-probe` the image to use.
         * This was created on the previous step.
+
+## Updating
+
+1. Change into the Burp Probe directory.
+1. Pull the latest code from the Burp Probe repository.
+    ```
+    git pull
+    ```
+1. Rebuild the Burp Probe Docker image.
+    ```
+    docker build --rm -t burp-probe .
+    ```
+1. Start Burp Probe using the `docker` command.
 
 ## Usage
 
