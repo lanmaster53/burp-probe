@@ -81,7 +81,7 @@ Burp Probe is not intended to be a competing product to Burp Suite Enterprise, b
 1. Browse to the application at http://127.0.0.1.
 1. Log in to the application.
 1. Add a scanner node on the "Nodes" page. See the "Deploying Scanner Nodes" section for details on setting up a node.
-    1. Use the hostname `host.docker.internal` to access a Burp Suite Pro instance running on the local host.
+    * Accessing a Burp Suite Pro instance running on the local host may require the host IP address or `host.docker.internal`.
 1. Configure and run a scan on the "Scans" page.
 1. Click the scan to monitor it for results.
 
