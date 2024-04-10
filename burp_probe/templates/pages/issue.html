@@ -37,11 +37,12 @@
     </div>
 </div>
 <div class="flex flex-col gap-4">
-    {{ accordion('Description', issue_event.issue.description)}}
-    {{ accordion('Background', issue_event.issue.issue_background)}}
-    {{ accordion('Remediation', issue_event.issue.remediation_background)}}
+    {{ accordion('Description', issue_event.issue.description, 'description')}}
+    {{ accordion('Background', issue_event.issue.issue_background, 'background')}}
+    {{ accordion('Remediation', issue_event.issue.remediation_background, 'remediation')}}
     {% for exhibit in issue_event.parsed.exhibits %}
-    {{ accordion(exhibit.title, exhibit.content)}}
+    {% set id = exhibit.title|lower + '-' + loop.index|string %}
+    {{ accordion(exhibit.title, exhibit.content, id, loop.index)}}
     {% endfor %}
 </div>
 <style>
