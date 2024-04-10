@@ -1,5 +1,6 @@
 from burp_probe.models import Node, Scan
-from marshmallow import Schema, fields, pre_load, validate, validates, validates_schema, ValidationError
+from marshmallow import Schema, fields, validate, validates, validates_schema, ValidationError
+import re
 
 # region form validation schemas
 
@@ -39,12 +40,18 @@ class NodeFormUpdateSchema(NodeFormSchema):
 class ScanFormSchema(Schema):
     name = fields.Str(required=True)
     description = fields.Str()
-    credentials = fields.Str(validate=validate.Regexp(r'[^:]:[^:]'))
+    credentials = fields.Str()
     configurations = fields.Str()
     targets = fields.Str(required=True)
     scope_includes = fields.Str(required=True)
     scope_excludes = fields.Str()
     node = fields.Str(required=True)
+
+    @validates('credentials')
+    def credentials_are_valid(self, value):
+        for line in value.split('\n'):
+            if not re.match(r'^[^:]+:[^:]+$', line):
+                raise ValidationError('String does not match expected pattern.')
 
     @validates('name')
     def name_is_unique(self, value):

@@ -5,8 +5,7 @@ from burp_probe.decorators import hx_trigger, login_required
 from burp_probe.helpers import render_partial
 from burp_probe.middleware import load_user, strip_empty_params, modify_response
 from burp_probe.models import Node, Scan
-from burp_probe.services.burp import BurpProApi, BurpServiceException
-from burp_probe.utilities import burp_scan_builder, BurpIssueParser
+from burp_probe.services.burp import BurpProApi, BurpScanBuilder, BurpServiceException, BurpIssueParser
 from burp_probe.schemas import node_form_create_schema, node_form_update_schema, scan_form_schema
 import json
 import traceback
@@ -221,7 +220,8 @@ def scans_create():
     db.session.add(scan)
     db.session.flush()
     callback_url = None
-    scan_config = burp_scan_builder(callback_url, credentials, configurations, scope_includes, scope_excludes, target_urls)
+    scan_builder = BurpScanBuilder(callback_url, credentials, configurations, scope_includes, scope_excludes, target_urls)
+    scan_config = scan_builder.config_as_json
     current_app.logger.debug(f"Scanner Config:\n{json.dumps(scan_config, indent=4)}")
     burp = BurpProApi(
         protocol=node.protocol,

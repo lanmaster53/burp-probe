@@ -1,7 +1,7 @@
 from burp_probe import db, bcrypt
 from burp_probe.constants import ScanStates
-from burp_probe.services.burp import BurpProApi
-from burp_probe.utilities import get_guid, get_current_utc_time, get_local_from_utc, BurpScanParser
+from burp_probe.services.burp import BurpProApi, BurpScanParser
+from burp_probe.utilities import get_guid, get_current_utc_time
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 import binascii
 import json
