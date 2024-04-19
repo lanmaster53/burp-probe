@@ -1,12 +1,12 @@
 <img src="https://github.com/lanmaster53/burp-probe/raw/main/burp_probe/static/images/logo.png" width=500 />
 
-Burp Probe, or **Burp P**ro **R**esemblance **O**f **B**urp **E**nterprise, is a web application that leverages the Burp Suite Pro REST API to provide a centralized and managed platform for remotely conducting scans through a distributed network of Burp Suite Pro instances.
+Burp Probe, or **Burp P**ro **R**esemblance **O**f **B**urp **E**nterprise, is a web application that leverages the Burp Suite Pro REST API to provide a centralized and managed platform for conducting scans through a remote instance of Burp Suite Pro.
 
-Burp Suite Pro contains a minimal REST API that provides the ability to remotely launch Burp Scanner scans. Burp Probe uses this functionality to launch scans on registered Burp Suite Pro instances (nodes) that are deployed throughout a network environment. Burp Probe then tracks and monitors nodes and their associated scans, while providing users with the ability to review scan results in real-time.
+Burp Suite Pro contains a minimal REST API that provides the ability to remotely launch Burp Scanner scans. Burp Probe uses this functionality to launch scans on a remote instance of Burp Suite Pro (node). Burp Probe then tracks and monitors the node and its associated scans, while providing users with the ability to review scan results in real-time.
 
 ## Burp Probe vs. Burp Suite Enterprise
 
-Burp Probe is not intended to be a competing product to Burp Suite Enterprise, but rather a poor man's gateway drug to the real deal. If you're looking for a complete enterprise-level solution, Burp Suite Enterprise has vastly more capability than Burp Probe. Below is a table showing a light comparison between Burp Probe and Burp Suite Enterprise that barely scratches the surface of what Burp Suite Enterprise can do. For a full list of features, check out PortSwigger's [Burp Suite Enterprise Features page](https://portswigger.net/burp/enterprise/features).
+Burp Probe is not intended to be a competing product to Burp Suite Enterprise, but rather an alternative for Burp Suite Pro users that have no need for an enterprise-level solution. If you're looking for a complete enterprise-level solution, Burp Suite Enterprise has vastly more capability than Burp Probe. Below is a table showing a light comparison between Burp Probe and Burp Suite Enterprise that barely scratches the surface of what Burp Suite Enterprise can do. For a full list of features, check out PortSwigger's [Burp Suite Enterprise Features page](https://portswigger.net/burp/enterprise/features).
 
 | Feature | Probe | Enterprise |
 |---------|:-----:|:----------:|
@@ -17,6 +17,7 @@ Burp Probe is not intended to be a competing product to Burp Suite Enterprise, b
 | CI/CD pipeline integrations | :x: | :white_check_mark: |
 | Vulnerability management | :x: | :white_check_mark: |
 | Reporting | :x: | :white_check_mark: |
+| Multi-user support | :x: | :white_check_mark: |
 | Open Source-ish | :white_check_mark: | :x: |
 | Complex authentication handling <sup>1</sup> | :white_check_mark: | :x: |
 | Free to use <sup>2</sup> | :white_check_mark: | :x: |
@@ -25,7 +26,7 @@ Burp Probe is not intended to be a competing product to Burp Suite Enterprise, b
 
 <sup>2</sup> Burp Probe is free to use privately and commercially (see [LICENSE.txt](https://github.com/lanmaster53/burp-probe/blob/main/LICENSE.txt) for more details). However, if you'd like to help fund the time I spend on this project, then I gladly accept donations via PayPal. Thank you!
 
-[![](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=tjt1980@gmail.com&item_name=Donation+for+Burp+Probe)
+[![](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://paypal.me/lanmaster53)
 
 # Getting Started
 
