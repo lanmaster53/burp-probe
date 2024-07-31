@@ -1,5 +1,6 @@
 unused/
 data/
 .DS_Store
+.env
 *.pyc
 *.vscode*

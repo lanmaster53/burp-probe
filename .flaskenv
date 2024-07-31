@@ -1,2 +1,3 @@
 FLASK_APP=server.py
-CONFIG=Development
+FLASK_DEBUG=True
+FLASK_RUN_PORT=5000

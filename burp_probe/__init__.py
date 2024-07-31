@@ -1,23 +1,26 @@
 from flask import Flask
 from flask.logging import default_handler
-from flask_bcrypt import Bcrypt
-from flask_sqlalchemy import SQLAlchemy
-from flask_apscheduler import APScheduler
+from burp_probe.extensions import db, bcrypt, scheduler
 from burp_probe.helpers import render_partial
 import json
 import logging
+import os
 
 default_handler.setFormatter(logging.Formatter('[%(asctime)s] %(levelname)s from %(name)s in %(module)s: %(message)s'))
 
-db = SQLAlchemy()
-bcrypt = Bcrypt()
-scheduler = APScheduler()
+# ----------------------------
+# Application Factory Function
+# ----------------------------
 
-def create_app(config):
+def create_app():
 
+    # Create the Flask application
     app = Flask(__name__, static_url_path='')
-    app.config.from_object('burp_probe.config.{}'.format(config.title()))
-    app.logger.info(f"Burp Probe starting in {config} mode.")
+
+    # Configure the Flask application
+    config_class = os.getenv('CONFIG', default='Production')
+    app.config.from_object('burp_probe.config.{}'.format(config_class.title()))
+    app.logger.info(f"Burp Probe starting in {config_class} mode.")
 
     db.init_app(app)
     bcrypt.init_app(app)
@@ -31,9 +34,9 @@ def create_app(config):
             return ''
         return arg
 
-    # converts None types to empty strings in the template context
+    # Convert None types to empty strings in the template context
     app.jinja_env.finalize = finalize
-    # clean up white space left behind by jinja template code
+    # Clean up white space left behind by jinja template code
     app.jinja_env.trim_blocks = True
     app.jinja_env.lstrip_blocks = True
 
@@ -48,9 +51,9 @@ def create_app(config):
             data = json.loads(data)
         return json.dumps(data, indent=4)
 
-    from burp_probe.views.auth import blp as AuthBlueprint
+    from burp_probe.routes.auth import blp as AuthBlueprint
     app.register_blueprint(AuthBlueprint)
-    from burp_probe.views.core import blp as CoreBlueprint
+    from burp_probe.routes.core import blp as CoreBlueprint
     app.register_blueprint(CoreBlueprint)
 
     @app.cli.command('init')
@@ -58,6 +61,7 @@ def create_app(config):
         from burp_probe import models
         db.create_all()
         app.logger.info('Database initialized.')
+        # Initialization logic here (optional)
         from burp_probe.constants import UserTypes
         import string
         import secrets
@@ -78,7 +82,7 @@ def create_app(config):
 
     @app.cli.command('migrate')
     def migrate_data():
-        # migration logic here
+        # Migration logic here (optional)
         app.logger.info('Migration complete.')
 
     return app
