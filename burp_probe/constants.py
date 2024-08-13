@@ -1,8 +1,8 @@
-class UserTypes:
+class UserTypes(object):
     ADMIN = 'admin'
     USER = 'user'
 
-class ScanStates:
+class ScanStates(object):
     SUCCEEDED = 'succeeded'
     CANCELLED = 'cancelled'
     FAILED = 'failed'

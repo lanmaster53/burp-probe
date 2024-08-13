@@ -15,11 +15,11 @@ default_handler.setFormatter(logging.Formatter('[%(asctime)s] %(levelname)s from
 def create_app():
 
     # Create the Flask application
-    app = Flask(__name__, static_url_path='')
+    app = Flask(__name__)
 
     # Configure the Flask application
     config_class = os.getenv('CONFIG', default='Production')
-    app.config.from_object('burp_probe.config.{}'.format(config_class.title()))
+    app.config.from_object(f"burp_probe.config.{config_class.title()}")
     app.logger.info(f"Burp Probe starting in {config_class} mode.")
 
     db.init_app(app)
@@ -29,13 +29,8 @@ def create_app():
 
     from burp_probe.tasks import scan_sync
 
-    def finalize(arg):
-        if arg is None:
-            return ''
-        return arg
-
     # Convert None types to empty strings in the template context
-    app.jinja_env.finalize = finalize
+    app.jinja_env.finalize = lambda val: '' if val is None else val
     # Clean up white space left behind by jinja template code
     app.jinja_env.trim_blocks = True
     app.jinja_env.lstrip_blocks = True

@@ -12,7 +12,7 @@ class BurpServiceException(Exception):
     pass
 
 
-class BurpProApi:
+class BurpProApi(object):
 
     def __init__(self, protocol='http', hostname='127.0.0.1', port=1337, api_key=None, version='0.1'):
         self.logger = logging.getLogger('burp_probe.burp_service')
@@ -75,7 +75,7 @@ class BurpProApi:
             return False
 
 
-class BurpScanBuilder:
+class BurpScanBuilder(object):
 
     def __init__(self, callback_url, credentials, configurations, scope_includes, scope_excludes, target_urls):
         self.raw_callback_url = callback_url
@@ -170,7 +170,7 @@ class BurpScanBuilder:
         return scan_config
 
 
-class BurpScanParser:
+class BurpScanParser(object):
 
     dtg_format = "%Y-%m-%d %H:%M:%S"
     time_format = '%-I:%M %p'
@@ -255,7 +255,7 @@ class BurpScanParser:
         return issues
 
 
-class BurpIssueParser:
+class BurpIssueParser(object):
 
     def __init__(self, issue_event):
         self.logger = logging.getLogger('burp_probe.burp_issue_parser')
